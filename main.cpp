@@ -3,19 +3,21 @@
 
 int main(int argc, char const *argv[])
 {
-	/*cout << wrap_message("_n", "", "Peru", "synonyms:Ecuador,Chile,Uruguay") << endl;
-	cout << wrap_message("_l", "", "Peru,Bolivia", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay") << endl;
-	cout << wrap_message("_q", "2", "Peru", "") << endl;*/
 
     Protocol test;
-    /*list<chars> unwrap_mess = test.unwrap("_n100080030Colombiasynonyms:Ecuador,Chile,Uruguay");
+
+	cout << test.wrap("_n", "", "Peru", "synonyms:Ecuador,Chile,Uruguay") << endl;
+	cout << test.wrap("_l", "", "Peru,Bolivia", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay") << endl;
+	cout << test.wrap("_q", "2", "Peru", "") <<endl<<endl;
+
+    //list<chars> unwrap_mess = test.unwrap("_q200040000Peru");
+    list<chars> unwrap_mess = test.unwrap("_l100120061Peru,Boliviasynonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay");
     cout<<endl<<"PARAMETERS TO SERVER"<<endl<<endl;
     test.print_list_str(unwrap_mess);
-    //cout<<unwrap_mess<<endl;
-*/
-    //cout << wrap_message("_l", "", "Peru,Bolivia", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay") << endl;
-    list<chars> unwrap_mess = test.unwrap("_l100120061Peru,Boliviasynonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay");
-    test.print_list_str(unwrap_mess);
+
+    cout<<endl<<endl;
+    /*list<chars> splited = splitt("hello,mother,fucker,this,is,working", ',');
+    print_vec_str(splited);*/
 
 	return 0;
 }

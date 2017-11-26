@@ -25,7 +25,7 @@ class Protocol{
         // chars all_message_size(chars);
 
         // (action, data) 
-        // chars wrap(chars, chars);
+        chars wrap(chars, chars, chars, chars);
 
         // (data)
         list<chars> unwrap(chars);
@@ -45,6 +45,7 @@ Protocol::Protocol(){
     this->type_messages_unwrap[1] = simple_message_unwr; // key for this unwarp func is "1"*/
     this->type_messages_unwrap["_n"] = unwrap_new_node;
     this->type_messages_unwrap["_l"] = unwrap_new_link;
+    this->type_messages_unwrap["_q"] = unwrap_query_deepness;
 }/**/
 /*
 void Protocol::print_binary(vector<int> v){
@@ -83,15 +84,12 @@ chars Protocol::all_message_size(chars total_messa){
 
     return MAIN_HEADER;
 }
+*/
 
+chars Protocol::wrap(chars action, chars deepness, chars data, chars attribu){
 
-chars Protocol::wrap(chars action, chars deepness, chars data, chars attributes){
-    map<chars, func>::iterator it;
-    // searching a func in map of type of messages to envelop with func found
-    it = this->type_messages_envelop.find(type_messa);
-
-    return it->second(data);
-}*/
+    return wrap_message(action, deepness, data, attribu);
+}
 
 void Protocol::print_list_str(list<chars> msgs){
     for (auto v : msgs)
@@ -99,10 +97,8 @@ void Protocol::print_list_str(list<chars> msgs){
 }
 
 list<chars> Protocol::unwrap(chars data){
-    cout<<"data: "<<data[0]<<endl;
-    chars action = data.substr(0, 2);
-    cout<<"action: "<<action<<endl;
 
+    chars action = data.substr(0, 2);
     map<chars, func>::iterator it;
     // searching a func in map of type of messages to unwrap with func found
     it = this->type_messages_unwrap.find(action);

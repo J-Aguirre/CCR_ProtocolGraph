@@ -108,6 +108,26 @@ chars simple_message_unwr(chars m){
 }*/
 //vector<string> split(const string& input, const string& regex) {
 
+void print_vec_str(list<chars> words){
+    for (auto v : words)
+        cout << v << "\n";
+}
+
+list<chars> splitt(chars s, char c)
+{
+    chars buff = "";
+    list<string> v;
+    
+    for(auto n:s)
+    {
+        if(n != c) buff+=n; else
+        if(n == c && buff != "") { v.push_back(buff); buff = ""; }
+    }
+    if(buff != "") v.push_back(buff);
+    
+    return v;
+}
+
 int number_digits(int number){
     int digits = 0;
     if(number == 0) return 1;
@@ -161,8 +181,12 @@ list<chars> unwrap_new_node(chars message){
     return answer;
 }
 
+// the first 2 will be the principal words (word1,word2), the next will be the attributes one for eachother
+// word1 => attribute1.1, attribute 1.2 ...
+// word2 => attribute2.1, attribute 2.2 ...
+// <Valu1, value2, attribute1.1, attribute2.1, attribute1.2, attribute2.2 ...>
 list<chars> unwrap_new_link(chars message){
-    list<chars> answer;
+    list<chars> answer, answer2;
     chars action = message.substr(0, 2);
     answer.push_back(action);
 
@@ -178,8 +202,30 @@ list<chars> unwrap_new_link(chars message){
     chars attributes = message.substr(words_size,attributes_size);
     cout << "attributes: " << attributes << endl;
 
-    answer = split(words,',');
+    answer = splitt(words,',');
+    answer2 = splitt(attributes,';');
+    answer.merge(answer2);
+    print_vec_str(answer);
 
 
     return answer;
 }
+
+list<chars> unwrap_query_deepness(chars message){
+    list<chars> answer;
+    chars action = message.substr(0, 2);
+    answer.push_back(action);
+
+    chars deepness = message.substr(2, 1);
+    answer.push_back(deepness);
+
+    chars word_size_str = message.substr(3, 4);
+    int word_size = stoi(word_size_str);
+    cout<<"word_size: "<<word_size<<endl;
+    chars word = message.substr(11, word_size);
+    cout<<"word: "<<word<<endl;
+    answer.push_back(word);
+
+    return answer;    
+}
+
