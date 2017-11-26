@@ -159,6 +159,7 @@ chars wrap_message(chars action, chars deepness, chars word, chars attributes){
     return action + deepness + fill_zeros(word_size, word_number) + fill_zeros(attribute_size, attribute_number) + word + attributes;
 }
 
+//list:<action, word, attributes>
 list<chars> unwrap_new_node(chars message){
     list<chars> answer;
     chars action = message.substr(0, 2);
@@ -199,7 +200,7 @@ list<chars> unwrap_new_link(chars message){
     chars words = message.substr(0,words_size);
     cout << "words: " << words << endl;
 
-    chars attributes = message.substr(words_size,attributes_size);
+    chars attributes = message.substr(words_size, attributes_size);
     cout << "attributes: " << attributes << endl;
 
     answer = splitt(words,',');
@@ -211,6 +212,7 @@ list<chars> unwrap_new_link(chars message){
     return answer;
 }
 
+// list:<action, deepness, word>
 list<chars> unwrap_query_deepness(chars message){
     list<chars> answer;
     chars action = message.substr(0, 2);
@@ -227,5 +229,32 @@ list<chars> unwrap_query_deepness(chars message){
     answer.push_back(word);
 
     return answer;    
+}
+
+//list: <action, deepness, >
+list<chars> unwrap_sentence_deepness(chars message){
+    list<chars> words_l, attributes_l;
+    chars action = message.substr(0, 2);
+    chars deepness = message.substr(2, 1);
+
+    chars word_size_str = message.substr(3, 4);
+    int word_size = stoi(word_size_str);
+    cout<<"word_size: "<<word_size<<endl;
+    chars word = message.substr(11, word_size);
+
+    chars attributes_size_str = message.substr(7,4);
+    cout<<"attributes_size_str: "<<attributes_size_str<<endl;
+    int attributes_size = stoi(attributes_size_str);
+    cout<<"attributes_size: "<<attributes_size<<endl;
+    chars attributes = message.substr(11 + word_size, attributes_size);
+    cout << "attributes: " << attributes << endl;
+
+    words_l =  splitt(word, ',');
+    attributes_l = splitt(attributes, ',');
+    words_l.merge(attributes_l);
+    words_l.push_front(deepness);
+    words_l.push_front(action);
+
+    return words_l;
 }
 

@@ -46,6 +46,7 @@ Protocol::Protocol(){
     this->type_messages_unwrap["_n"] = unwrap_new_node;
     this->type_messages_unwrap["_l"] = unwrap_new_link;
     this->type_messages_unwrap["_q"] = unwrap_query_deepness;
+    this->type_messages_unwrap["_p"] = unwrap_sentence_deepness;
 }/**/
 /*
 void Protocol::print_binary(vector<int> v){
