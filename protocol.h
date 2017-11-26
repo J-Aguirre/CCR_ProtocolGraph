@@ -8,7 +8,7 @@
 using namespace std;
 
 typedef string chars;
-typedef chars (*func)(chars);
+typedef list<chars> (*func)(chars);
 
 class Protocol{
 
@@ -28,13 +28,14 @@ class Protocol{
         // chars wrap(chars, chars);
 
         // (data)
-        chars unwrap(chars);
+        list<chars> unwrap(chars);
 
         // transform first character to bits
         /*vector<int> transform_char_to_bits(unsigned char);
 
         int transform_bits_to_decimal(vector<int>);
         void print_binary(vector<int>);*/
+        void print_list_str(list<chars>);
 
 };
 
@@ -43,7 +44,7 @@ Protocol::Protocol(){
     this->type_messages_envelop["simple-message"] = simple_message_env; // key for this envelop func is "simple-message" 
     this->type_messages_unwrap[1] = simple_message_unwr; // key for this unwarp func is "1"*/
     this->type_messages_unwrap["_n"] = unwrap_new_node;
-    this->type_messages_unwrap["_l"] = unwrap_new_link;
+    //this->type_messages_unwrap["_l"] = unwrap_new_link;
 }/**/
 /*
 void Protocol::print_binary(vector<int> v){
@@ -92,8 +93,12 @@ chars Protocol::wrap(chars action, chars deepness, chars data, chars attributes)
     return it->second(data);
 }*/
 
+void Protocol::print_list_str(list<chars> msgs){
+    for (auto v : msgs)
+        cout << v << "\n";
+}
 
-chars Protocol::unwrap(chars data){
+list<chars> Protocol::unwrap(chars data){
     cout<<"data: "<<data[0]<<endl;
     chars action = data.substr(0, 2);
     cout<<"action: "<<action<<endl;
@@ -102,6 +107,6 @@ chars Protocol::unwrap(chars data){
     // searching a func in map of type of messages to unwrap with func found
     it = this->type_messages_unwrap.find(action);
 
-    return it->second(data.substr(2));
+    return it->second(data);
 }
 

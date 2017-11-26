@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string.h>
 #include <iostream>
+#include <list>
 
 #define FIELD_WORD_SIZE 4
 #define FIELD_ATRIBUTE_SIZE 4
@@ -137,16 +138,27 @@ chars wrap_message(chars action, chars deepness, chars word, chars attributes){
     return action + deepness + fill_zeros(word_size, word_number) + fill_zeros(attribute_size, attribute_number) + word + attributes;
 }
 
-chars unwrap_new_node(chars message){
-    chars word_size_str = message.substr(1, 4);
+list<chars> unwrap_new_node(chars message){
+    list<chars> answer;
+    chars action = message.substr(0, 2);
+    answer.push_back(action);
+
+    chars word_size_str = message.substr(3, 4);
     int word_size = stoi(word_size_str);
-    chars attributes_size_str = message.substr(5, 4);
+    cout<<"word_size: "<<word_size<<endl;
+    chars word = message.substr(11, word_size);
+    cout<<"word: "<<word<<endl;
+    answer.push_back(word);
+
+    chars attributes_size_str = message.substr(9, 4);
     int attributes_size = stoi(attributes_size_str);
     cout<<"attributes_size: "<<attributes_size<<endl;
 
-    return "unwrap_new_node: " + message;
+    return answer;
 }
 
-chars unwrap_new_link(chars message){
-    return "unwrap_new_link: " + message;
-}
+/*list<chars> unwrap_new_link(chars message){
+    list<chars> answer;
+
+    return answer;
+}*/
