@@ -191,7 +191,7 @@ void print_vec_str(vector<chars> words){
 
 vector<chars> splitt(chars s, char c)
 {
-    chars buff{""};
+    chars buff = "";
     vector<string> v;
     
     for(auto n:s)
