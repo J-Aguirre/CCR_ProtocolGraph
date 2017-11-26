@@ -106,14 +106,8 @@ chars simple_message_unwr(chars m){
 
     return unwrapped_messa;
 }*/
-vector<std::string> split(const string& input, const string& regex) {
-    // passing -1 as the submatch index parameter performs splitting
-    std::regex re(regex);
-    std::sregex_token_iterator
-        first{input.begin(), input.end(), re, -1},
-        last;
-    return {first, last};
-}
+//vector<string> split(const string& input, const string& regex) {
+
 
 int number_digits(int number){
     int digits = 0;
@@ -164,9 +158,10 @@ list<chars> unwrap_new_node(chars message){
 
     return answer;
 }
-
-chars unwrap_new_link(chars message){
-    chars words_size_str = message.substr(1,4);
+/*
+list<chars> unwrap_new_link(chars message){
+    list<chars> answer;
+    chars words_size_str = message.substr(0,4);
     int words_size = stoi(words_size_str);
     chars attributes_size_str = message.substr(5,4);
     int attributes_size = stoi(attributes_size_str);
@@ -183,5 +178,7 @@ chars unwrap_new_link(chars message){
             word = message.substr(1,word_counter);
         }
     }
-    return "";
+
+    return answer;
 }
+*/
