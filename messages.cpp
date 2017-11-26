@@ -207,7 +207,6 @@ list<chars> unwrap_new_link(chars message){
     answer.merge(answer2);
     print_vec_str(answer);
 
-
     return answer;
 }
 
@@ -229,3 +228,16 @@ list<chars> unwrap_query_deepness(chars message){
     return answer;    
 }
 
+list<chars> unwrap_info_node(chars message){
+    list<chars> answer;
+    chars action = message.substr(0, 2);
+    answer.push_back(action);
+
+    chars word_size_str = message.substr(3, 4);
+    int word_size = stoi(word_size_str);
+    cout<<"word_size: "<<word_size<<endl;
+    chars word = message.substr(11, word_size);
+    answer.push_back(word);
+
+    return answer;
+}
