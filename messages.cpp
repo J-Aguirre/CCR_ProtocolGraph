@@ -160,8 +160,46 @@ list<chars> unwrap_new_node(chars message){
     return answer;
 }
 
-/*list<chars> unwrap_new_link(chars message){
+list<chars> unwrap_new_link(chars message){
     list<chars> answer;
 
     return answer;
-}*/
+}
+
+list<chars> unwrap_query_deepness(chars message){
+    list<chars> answer;
+    chars action = message.substr(0, 2);
+    answer.push_back(action);
+
+    chars deepness = message.substr(2, 1);
+    answer.push_back(deepness);
+
+    chars word_size_str = message.substr(3, 4);
+    int word_size = stoi(word_size_str);
+    cout<<"word_size: "<<word_size<<endl;
+    chars word = message.substr(11, word_size);
+    cout<<"word: "<<word<<endl;
+    answer.push_back(word);
+
+    return answer;    
+}
+
+void print_vec_str(vector<chars> words){
+    for (auto v : words)
+        cout << v << "\n";
+}
+
+vector<chars> splitt(chars s, char c)
+{
+    chars buff{""};
+    vector<string> v;
+    
+    for(auto n:s)
+    {
+        if(n != c) buff+=n; else
+        if(n == c && buff != "") { v.push_back(buff); buff = ""; }
+    }
+    if(buff != "") v.push_back(buff);
+    
+    return v;
+}
