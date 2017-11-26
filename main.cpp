@@ -8,7 +8,8 @@ int main(int argc, char const *argv[])
 	cout << wrap_message("_q", "2", "Peru", "") << endl;*/
 
     Protocol test;
-    list<chars> unwrap_mess = test.unwrap("_n100040030Perusynonyms:Ecuador,Chile,Uruguay");
+    list<chars> unwrap_mess = test.unwrap("_n100080030Colombiasynonyms:Ecuador,Chile,Uruguay");
+    cout<<endl<<"PARAMETERS TO SERVER"<<endl<<endl;
     test.print_list_str(unwrap_mess);
     //cout<<unwrap_mess<<endl;
 

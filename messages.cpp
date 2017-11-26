@@ -153,6 +153,9 @@ list<chars> unwrap_new_node(chars message){
     chars attributes_size_str = message.substr(9, 4);
     int attributes_size = stoi(attributes_size_str);
     cout<<"attributes_size: "<<attributes_size<<endl;
+    chars attributes = message.substr(11 + word_size, attributes_size);
+    cout<<"attributes: "<<attributes<<endl;
+    answer.push_back(attributes);
 
     return answer;
 }
