@@ -108,7 +108,6 @@ chars simple_message_unwr(chars m){
 }*/
 //vector<string> split(const string& input, const string& regex) {
 
-
 int number_digits(int number){
     int digits = 0;
     if(number == 0) return 1;
@@ -155,30 +154,32 @@ list<chars> unwrap_new_node(chars message){
     chars attributes_size_str = message.substr(9, 4);
     int attributes_size = stoi(attributes_size_str);
     cout<<"attributes_size: "<<attributes_size<<endl;
+    chars attributes = message.substr(11 + word_size, attributes_size);
+    cout<<"attributes: "<<attributes<<endl;
+    answer.push_back(attributes);
 
     return answer;
 }
-/*
+
 list<chars> unwrap_new_link(chars message){
     list<chars> answer;
-    chars words_size_str = message.substr(0,4);
+    chars action = message.substr(0, 2);
+    answer.push_back(action);
+
+    chars words_size_str = message.substr(3,4);
     int words_size = stoi(words_size_str);
     chars attributes_size_str = message.substr(5,4);
     int attributes_size = stoi(attributes_size_str);
 
-    message = message.substr(9);
-    chars word = "";
-    int word_counter = 0;
-    //cout << "message: " << message << endl;
-    for(int i=0; i<words_size; i++){
-        if(message[i] != ','){
-            word_counter++;
-        }
-        else{
-            word = message.substr(1,word_counter);
-        }
-    }
+    message = message.substr(11);
+    chars words = message.substr(0,words_size);
+    cout << "words: " << words << endl;
+
+    chars attributes = message.substr(words_size,attributes_size);
+    cout << "attributes: " << attributes << endl;
+
+    answer = split(words,',');
+
 
     return answer;
 }
-*/
