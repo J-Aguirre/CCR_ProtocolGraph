@@ -186,9 +186,8 @@ list<chars> unwrap_new_node(chars message){
 // word2 => attribute2.1, attribute 2.2 ...
 // <Valu1, value2, attribute1.1, attribute2.1, attribute1.2, attribute2.2 ...>
 list<chars> unwrap_new_link(chars message){
-    list<chars> answer, answer2;
+    list<chars> answer, answer1, answer2;
     chars action = message.substr(0, 2);
-    answer.push_back(action);
 
     chars words_size_str = message.substr(3,4);
     int words_size = stoi(words_size_str);
@@ -197,12 +196,10 @@ list<chars> unwrap_new_link(chars message){
 
     message = message.substr(11);
     chars words = message.substr(0,words_size);
-    cout << "words: " << words << endl;
 
     chars attributes = message.substr(words_size,attributes_size);
-    cout << "attributes: " << attributes << endl;
-
     answer = splitt(words,',');
+    answer.push_front(action);
     answer2 = splitt(attributes,';');
     answer.merge(answer2);
     print_vec_str(answer);
