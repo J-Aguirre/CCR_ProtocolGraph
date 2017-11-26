@@ -133,5 +133,20 @@ chars wrap_message(chars action, chars deepness, chars word, chars attributes){
     // cout << "atribute_size: " << attribute_size << endl;
     // cout << "number_digits: " <<number_digits(attribute_size) << endl;
 
-    return action + "/" + deepness + "/" + fill_zeros(word_size, word_number) + "/" + fill_zeros(attribute_size, attribute_number) + "/" + word + "/" + attributes;
+    /*return action + "/" + deepness + "/" + fill_zeros(word_size, word_number) + "/" + fill_zeros(attribute_size, attribute_number) + "/" + word + "/" + attributes;*/
+    return action + deepness + fill_zeros(word_size, word_number) + fill_zeros(attribute_size, attribute_number) + word + attributes;
+}
+
+chars unwrap_new_node(chars message){
+    chars word_size_str = message.substr(1, 4);
+    int word_size = stoi(word_size_str);
+    chars attributes_size_str = message.substr(5, 4);
+    int attributes_size = stoi(attributes_size_str);
+    cout<<"attributes_size: "<<attributes_size<<endl;
+
+    return "unwrap_new_node: " + message;
+}
+
+chars unwrap_new_link(chars message){
+    return "unwrap_new_link: " + message;
 }
