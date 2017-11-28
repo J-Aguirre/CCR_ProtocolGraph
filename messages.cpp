@@ -108,7 +108,7 @@ chars simple_message_unwr(chars m){
 }*/
 //vector<string> split(const string& input, const string& regex) {
 
-void print_vec_str(list<chars> words){
+void print_list_str(list<chars> words){
     for (auto v : words)
         cout << v << "\n";
 }
@@ -159,6 +159,7 @@ chars wrap_message(chars action, chars deepness, chars word, chars attributes){
     return action + deepness + fill_zeros(word_size, word_number) + fill_zeros(attribute_size, attribute_number) + word + attributes;
 }
 
+
 //list:<action, word, attributes>
 list<chars> unwrap_new_node(chars message){
     list<chars> answer;
@@ -203,7 +204,7 @@ list<chars> unwrap_new_link(chars message){
     answer.push_front(action);
     answer2 = splitt(attributes,';');
     answer.merge(answer2);
-    print_vec_str(answer);
+    print_list_str(answer);
 
     return answer;
 }
@@ -219,9 +220,9 @@ list<chars> unwrap_query_deepness(chars message){
 
     chars word_size_str = message.substr(3, 4);
     int word_size = stoi(word_size_str);
-    cout<<"word_size: "<<word_size<<endl;
+    //cout<<"word_size: "<<word_size<<endl;
     chars word = message.substr(11, word_size);
-    cout<<"word: "<<word<<endl;
+    //cout<<"word: "<<word<<endl;
     answer.push_back(word);
 
     return answer;    
@@ -275,6 +276,77 @@ list<chars> unwrap_server_online(chars message){
     list<chars> answer;
     chars action = message.substr(0, 2);
     answer.push_back(action);
+
+    return answer;
+}
+
+//list: <action, state>
+// State would be "Ok" and "Error" identified as 1 or 0
+// the 0 and 1 are setted and read in Deepness.
+list<chars> unwrap_node_link_answer(chars message){
+    list<chars> answer;
+    chars action = message.substr(0, 2);
+    answer.push_back(action);
+
+    answer.push_back(message.substr(2,1));
+
+    return answer;
+}
+
+list<chars> unwrap_query_answer(chars message){
+    list<chars> answer;
+    chars action = message.substr(0, 2);
+
+    chars deepness = message.substr(2, 1);
+    cout<<"initial deepness: "<<deepness<<endl;
+    int deepness_number = stoi(deepness) - 1;
+    deepness = to_string(deepness_number);
+    cout<<"new deepness: "<<deepness<<endl;
+    
+
+    chars word_size_str = message.substr(3, 4);
+    int word_size = stoi(word_size_str);
+    chars attributes_size_str = message.substr(7, 4);
+    int attributes_size = stoi(attributes_size_str);
+
+    message = message.substr(11);
+    chars words = message.substr(0, word_size);
+    answer = splitt(words, ',');
+
+    chars attributes = message.substr(word_size, attributes_size);
+    list<chars> answer_attributes = splitt(attributes, ';');
+    answer.merge(answer_attributes);
+    answer.push_front(deepness);
+    answer.push_front(action);
+
+    return answer;
+}
+
+list<chars> unwrap_sentence_answer(chars message){
+    list<chars> answer;
+    chars action = message.substr(0, 2);
+
+    chars deepness = message.substr(2, 1);
+    cout<<"initial deepness: "<<deepness<<endl;
+    int deepness_number = stoi(deepness) - 1;
+    deepness = to_string(deepness_number);
+    cout<<"new deepness: "<<deepness<<endl;
+    
+
+    chars word_size_str = message.substr(3, 4);
+    int word_size = stoi(word_size_str);
+    chars attributes_size_str = message.substr(7, 4);
+    int attributes_size = stoi(attributes_size_str);
+
+    message = message.substr(11);
+    chars words = message.substr(0, word_size);
+    answer = splitt(words, ';');
+
+    chars attributes = message.substr(word_size, attributes_size);
+    list<chars> answer_attributes = splitt(attributes, ';');
+    answer.merge(answer_attributes);
+    answer.push_front(deepness);
+    answer.push_front(action);
 
     return answer;
 }
