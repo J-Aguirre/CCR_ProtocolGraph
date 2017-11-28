@@ -21,10 +21,11 @@ class Connection{
     sqlite3 *db;
     char *zErrMsg = 0;
     int rc;
-    void insert_node();
-    void update_node();
-    void delete_node();
-    void find_node();
+    string sql;
+    void insert_node(string attr);
+    void update_node(string attr, string new_attr);
+    void delete_node(string attr);
+    void find_node(string attr);
 
     ~Connection(){
       sqlite3_close(db);
@@ -42,9 +43,55 @@ Connection::Connection(){
 
 }
 
-void Connection::insert_node(){
-  sql = "INSERT INTO nodes (name) "  \
-        "VALUES ('Peru');";
+void Connection::insert_node(string attr){
+  sql = "insert into nodes (name) values('"+attr+"');";
+  const char *cstr_sql = sql.c_str();
+  cout <<cstr_sql<<endl;
   /* Execute SQL statement */
-  rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+  rc = sqlite3_exec(db, cstr_sql, callback, 0, &zErrMsg);
+  // cout <<"despues de ingresar"<<rc<<endl;
+  delete [] cstr_sql;
+}
+
+void Connection::find_node(string attr){
+  sql = "select * from nodes where name ='"+attr+"';";
+  // cout <<sql<<endl;
+  const char *cstr_sql = sql.c_str();
+  rc = sqlite3_exec(db, cstr_sql, callback,0, &zErrMsg);
+
+  if( rc != SQLITE_OK ) {
+     fprintf(stderr, "SQL error: %s\n", zErrMsg);
+     sqlite3_free(zErrMsg);
+  } else {
+     fprintf(stdout, "Operation done successfully\n");
+  }
+}
+
+void Connection::update_node(string attr, string new_attr){
+  sql = "update nodes set name = '"+new_attr +"' where name='"+attr+"';";
+  /* Execute SQL statement */
+  const char *cstr_sql = sql.c_str();
+  rc = sqlite3_exec(db, cstr_sql, callback,0, &zErrMsg);
+
+   if( rc != SQLITE_OK ) {
+      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+   } else {
+      fprintf(stdout, "Operation done successfully\n");
+   }
+
+}
+void Connection::delete_node(string attr){
+  sql = "delete from nodes where name='"+attr+"';";
+  /* Execute SQL statement */
+  const char *cstr_sql = sql.c_str();
+  rc = sqlite3_exec(db, cstr_sql, callback,0, &zErrMsg);
+
+   if( rc != SQLITE_OK ) {
+      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+   } else {
+      fprintf(stdout, "Operation done successfully\n");
+   }
+
 }
