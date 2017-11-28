@@ -1,6 +1,7 @@
 #include "protocol.h"
 #include "client.h"
 #include "server.h"
+#include "connection.h"
 #include <iostream>
 
 using namespace std;
@@ -35,7 +36,6 @@ int main(int argc, char const *argv[])
     if(strcmp(argv[1], "s") == 0)
     {
         Server* s = new Server(port);
-        /*s->load_data();*/
         s->connection();        
     }
 
@@ -46,7 +46,11 @@ int main(int argc, char const *argv[])
     else
         cout<<"Please insert a value to execute server(s) or client(c) "<<endl;
 
-    cout<<endl<<endl;
+    /*Connection test;
+    test.insert_node("ecuador");*/
 
-	return 0;
+    cout<<endl<<endl;
+    return 0;
 }
+
+//g++ main.cpp -o main -std=c++11 -pthread -l sqlite3
