@@ -53,8 +53,8 @@ Protocol::Protocol(){
     this->type_messages_unwrap["nn"] = unwrap_node_link_answer;
     this->type_messages_unwrap["ll"] = unwrap_node_link_answer;
     this->type_messages_unwrap["qq"] = unwrap_query_answer;
-    /*this->type_messages_unwrap["pp"] = unwrap_sentence_answer;
-    this->type_messages_unwrap["cc"] = unwrap_info_answer;
+    this->type_messages_unwrap["pp"] = unwrap_sentence_answer;
+    /*this->type_messages_unwrap["cc"] = unwrap_info_answer;
     this->type_messages_unwrap["ss"] = unwrap_servers_answer;*/
 
 }/**/

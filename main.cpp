@@ -18,7 +18,8 @@ int main(int argc, char const *argv[])
     cout << test.wrap("_s", "", "", "") <<endl;
     cout << test.wrap("nn", "1", "", "") <<endl;
     cout << test.wrap("ll", "1", "", "") <<endl;
-    cout << test.wrap("qq", "2", "Peru,Bolivia,Chile,Ecuador", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana") <<endl<<endl;
+    cout << test.wrap("qq", "2", "Peru,Bolivia,Chile,Ecuador", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana") <<endl;
+    cout << test.wrap("pp", "2", "Peru,Bolivia,Chile,Ecuador;Ecuador,Chile,Peru;Brasil,Colombia,Paraguay", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana") <<endl;
 
     /*list<chars> unwrap_mess = test.unwrap("_n100040030Perusynonyms:Ecuador,Chile,Uruguay");
     list<chars> unwrap_mess = test.unwrap("_l100200078Peru,Bolivia,Ecuadorsynonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Uruguay");
@@ -27,7 +28,7 @@ int main(int argc, char const *argv[])
     list<chars> unwrap_mess = test.unwrap("_c100040000Peru");
     list<chars> unwrap_mess = test.unwrap("_s100000000");*/
     //list<chars> unwrap_mess = test.unwrap("ll100000000");
-    list<chars> unwrap_mess = test.unwrap("qq200260121Peru,Bolivia,Chile,Ecuadorsynonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana");
+    list<chars> unwrap_mess = test.unwrap("pp200700121Peru,Bolivia,Chile,Ecuador;Ecuador,Chile,Peru;Brasil,Colombia,Paraguaysynonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana");
 
     cout<<endl<<"PARAMETERS TO SERVER"<<endl<<endl;
     test.print_list_str(unwrap_mess);

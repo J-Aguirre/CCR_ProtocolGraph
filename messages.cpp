@@ -321,3 +321,32 @@ list<chars> unwrap_query_answer(chars message){
 
     return answer;
 }
+
+list<chars> unwrap_sentence_answer(chars message){
+    list<chars> answer;
+    chars action = message.substr(0, 2);
+
+    chars deepness = message.substr(2, 1);
+    cout<<"initial deepness: "<<deepness<<endl;
+    int deepness_number = stoi(deepness) - 1;
+    deepness = to_string(deepness_number);
+    cout<<"new deepness: "<<deepness<<endl;
+    
+
+    chars word_size_str = message.substr(3, 4);
+    int word_size = stoi(word_size_str);
+    chars attributes_size_str = message.substr(7, 4);
+    int attributes_size = stoi(attributes_size_str);
+
+    message = message.substr(11);
+    chars words = message.substr(0, word_size);
+    answer = splitt(words, ';');
+
+    chars attributes = message.substr(word_size, attributes_size);
+    list<chars> answer_attributes = splitt(attributes, ';');
+    answer.merge(answer_attributes);
+    answer.push_front(deepness);
+    answer.push_front(action);
+
+    return answer;
+}
