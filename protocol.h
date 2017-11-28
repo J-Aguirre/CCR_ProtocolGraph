@@ -48,7 +48,15 @@ Protocol::Protocol(){
     this->type_messages_unwrap["_q"] = unwrap_query_deepness;
     this->type_messages_unwrap["_p"] = unwrap_sentence_deepness;
     this->type_messages_unwrap["_c"] = unwrap_info_node;
-    this->type_messages_unwrap["_s"] = unwrap_server_online;    
+    this->type_messages_unwrap["_s"] = unwrap_server_online;
+
+    this->type_messages_unwrap["nn"] = unwrap_node_link_answer;
+    this->type_messages_unwrap["ll"] = unwrap_node_link_answer;
+    this->type_messages_unwrap["qq"] = unwrap_query_answer;
+    /*this->type_messages_unwrap["pp"] = unwrap_sentence_answer;
+    this->type_messages_unwrap["cc"] = unwrap_info_answer;
+    this->type_messages_unwrap["ss"] = unwrap_servers_answer;*/
+
 }/**/
 /*
 void Protocol::print_binary(vector<int> v){
