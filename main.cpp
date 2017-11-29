@@ -1,7 +1,7 @@
 #include "protocol.h"
+#include "connection.h"
 #include "client.h"
 #include "server.h"
-#include "connection.h"
 #include <iostream>
 
 using namespace std;
@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
 
-    Protocol test;
+    //Protocol test;
 
 	/*cout << test.wrap("_n", "", "Peru", "synonyms:Ecuador,Chile,Uruguay") << endl;
 	cout << test.wrap("_l", "", "Peru,Bolivia", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana") << endl;
@@ -36,7 +36,7 @@ int main(int argc, char const *argv[])
 
     
     int port = 1101;
-    char const* IP_SERVER = "192.168.0.140";
+    char const* IP_SERVER = "192.168.9.108";
     chars path_bigramas = "../en.wiki.big";
     chars path_wordnet = "../CCR.WN";
 

@@ -14,6 +14,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <iterator>
 /*#include "protocol.h"*/
 
 using namespace std;
@@ -36,6 +37,7 @@ class Server {
         chars path_bigramas;
         chars path_wordnet;
         Protocol* protocol;
+        Connection* db;
         map<int, int> table_clients; // <name_number, number_socket>
 
         Server();
@@ -54,6 +56,7 @@ Server::Server(){}
 
 Server::Server(int port){
     this->protocol = new Protocol();
+    this->db = new Connection();
 
     this->SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     this->port = port;
@@ -134,6 +137,18 @@ void Server::new_client_connection(int connect_id){
         list<chars> test = this->protocol->unwrap(mess_unwrap);
         cout<<"Message of client:"<<endl;
         this->protocol->print_list_str(test);
+        int var = 0;
+        chars word = "";
+        for (auto v : test){
+            var++;
+            if (var == 2){
+                word = v;
+            }
+        }
+        /*auto test_front = test.begin();
+        advance(test_front, 2);*/
+        cout<<"word: "<<word<<endl;
+        this->db->insert_node(word);
 
         chars messa = "";
         if(strlen(buffer) > 0){
@@ -176,7 +191,7 @@ void Server::connection(){
         thread t(&Server::new_client_connection, this, ConnectFD);
         t.detach();
 
-        char answer;
+        /*char answer;
         printf("Did you want load bigramas to servers? (Y/n): ");
         scanf("%c" , &answer);
         printf("answer: %c", answer);
@@ -184,9 +199,9 @@ void Server::connection(){
 
             this->load_data();
         }
-        else{
+        else{*/
             printf("Waiting for another connection ... \n");
-        }
+        /*}*/
 
     }
 }
