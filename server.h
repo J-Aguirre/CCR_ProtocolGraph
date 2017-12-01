@@ -43,7 +43,7 @@ class Server {
         chars path_wordnet;
         Protocol* protocol;
         Connection* db;
-        map<int, chars > table_servers; // <name_number, number_socket>
+        map<int, pair<int, chars> > table_servers; // <name_number, number_socket>
         bool type_server = 0; // 1: server_slave, 0: server_master
 
         Server();
@@ -150,13 +150,13 @@ Server::Server(int port){
 
 
 void Server::print_table_servers(){
-    map<int, chars>::iterator it;
+    map<int, pair<int, chars> >::iterator it;
     printf("********SERVERS CONNECTED********* \n");
     printf("----------------------------------\n");
-    printf("Number name of server | Num ConnectID \n");
+    printf("ID | Num ConnectID | Number name of server \n");
 
     for(it=this->table_servers.begin(); it!=this->table_servers.end(); it++) {
-        printf("%10d | %15s \n", it->first, it->second.c_str());
+        printf("%10d | %10d |%15s \n", it->first, it->second.first, it->second.second.c_str());
     }
 }
 
@@ -169,8 +169,7 @@ void Server::new_client_connection(int connect_id){
         char* buffer;
         n = read(connect_id, buffer, DEFAUL_SIZE);
         if (n < 0) perror("ERROR reading from socket");
-        /*printf("buffer: %s\n", buffer);
-        printf("sizeof buffer: %d\n", sizeof(buffer));*/
+        
         chars mess_unwrap(buffer);
         cout<<"mess_unwrap: "<<mess_unwrap<<endl;
         list<chars> test = this->protocol->unwrap(mess_unwrap);
@@ -219,13 +218,16 @@ void Server::connection(){
             exit(EXIT_FAILURE);
         }
         printf("Client connected !!! \n");
-        char* buffer;
-        n = read(ConnectFD, buffer, 15);
+
+        char buffer[256];
+        bzero(buffer,256);
+        n = read(ConnectFD, buffer, 16);
         if (n < 0) perror("ERROR reading from socket");
+
         chars ip_server_connected(buffer);
-        /*int size_table_servers = table_servers.size();
-        table_servers[size_table_servers + 1] = ConnectFD;*/
-            table_servers[ConnectFD] = ip_server_connected;
+        pair<int, chars> element(ConnectFD, ip_server_connected);
+        int size_table = this->table_servers.size();
+        this->table_servers[size_table + 1] = element;
         this->print_table_servers();
 
 
