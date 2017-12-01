@@ -36,14 +36,20 @@ int main(int argc, char const *argv[])
 
     
     int port = 1101;
-    char const* IP_SERVER = "192.168.9.108";
+    char const* IP_SERVER = "192.168.160.177";
+    char const* IP_MYSELF = "192.168.160.177";
     chars path_bigramas = "../en.wiki.big";
     chars path_wordnet = "../CCR.WN";
 
-    if(strcmp(argv[1], "s") == 0)
+    if(strcmp(argv[1], "sm") == 0)
     {
         Server* s = new Server(port);
         s->connection();        
+    }
+
+    if(strcmp(argv[1], "ss") == 0){
+        Server* c = new Server(IP_SERVER, port, IP_MYSELF);
+        c->read_server();
     }
 
     if(strcmp(argv[1], "c") == 0){
