@@ -26,10 +26,15 @@ class Server {
 
     public:
         struct sockaddr_in stSockAddr;
+        int Res;
         int SocketFD;
         int port;
+        char const* ip_address;
+        char const* ip_myself;
+        int message_server;
 
         char message[255];
+        char buffer[256];
         int n;
 
         int packet_size;
@@ -38,13 +43,16 @@ class Server {
         chars path_wordnet;
         Protocol* protocol;
         Connection* db;
-        map<int, int> table_clients; // <name_number, number_socket>
+        map<int, pair<int, chars> > table_servers; // <name_number, number_socket>
+        bool type_server = 0; // 1: server_slave, 0: server_master
 
         Server();
+        Server(char const*, int, char const*);
         // port, header_size, packet_size,
         Server(int);        
-        void print_table_clients();
+        void print_table_servers();
         void connection();
+        void read_server();
         void new_client_connection(int);
         int split(const string txt, vector<string> &strs, char ch);
         int print_vec_s(vector<string>);
@@ -53,6 +61,56 @@ class Server {
 };
 
 Server::Server(){}
+
+Server::Server(char const* ip, int port, char const* ip_myself)
+{
+
+    this->protocol = new Protocol();
+    /*chars message = this->protocol->envelop("simple-message", "test text lalito");
+    cout<<"envelop message: "<<message<<endl;
+    chars unwrapped_messa = this->protocol->unwrap(message);
+    cout<<"unwrapped message: "<<unwrapped_messa<<endl;*/
+
+    this->ip_myself = ip_myself;
+    this->ip_address = ip;
+    this->port = port;
+    this->SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    // error while we try create the token
+    if (-1 == this->SocketFD)
+    {
+        perror("cannot create socket");
+        exit(EXIT_FAILURE);
+    }
+
+    memset(&this->stSockAddr, 0, sizeof(struct sockaddr_in));
+
+    this->stSockAddr.sin_family = AF_INET;
+    this->stSockAddr.sin_port = htons(this->port);
+    this->Res = inet_pton(AF_INET, ip_address, &this->stSockAddr.sin_addr);
+
+    if (0 > this->Res)
+    {
+        perror("error: first parameter is not a valid address family");
+        close(this->SocketFD);
+        exit(EXIT_FAILURE);
+    }
+    else if (0 == this->Res)
+    {
+        perror("char string (second parameter does not contain valid ipaddress");
+        close(this->SocketFD);
+        exit(EXIT_FAILURE);
+    }
+
+    if (-1 == connect(this->SocketFD, (const struct sockaddr *)&this->stSockAddr, sizeof(struct sockaddr_in)))
+    {
+        perror("connect failed");
+        close(this->SocketFD);
+        exit(EXIT_FAILURE);
+    }
+  
+}
+
 
 Server::Server(int port){
     this->protocol = new Protocol();
@@ -91,14 +149,14 @@ Server::Server(int port){
 }
 
 
-void Server::print_table_clients(){
-    map<int, int>::iterator it;
+void Server::print_table_servers(){
+    map<int, pair<int, chars> >::iterator it;
     printf("********SERVERS CONNECTED********* \n");
     printf("----------------------------------\n");
-    printf("Number name of server | Num Socket \n");
+    printf("ID | Num ConnectID | Number name of server \n");
 
-    for(it=this->table_clients.begin(); it!=this->table_clients.end(); it++) {
-        printf("%10d | %2d \n", it->first, it->second);
+    for(it=this->table_servers.begin(); it!=this->table_servers.end(); it++) {
+        printf("%10d | %10d |%15s \n", it->first, it->second.first, it->second.second.c_str());
     }
 }
 
@@ -108,30 +166,10 @@ void Server::new_client_connection(int connect_id){
     {
     // do
     // {
-
-        /*printf("DIGITS_TO_SIZE_IN_BYTES_ALL: %d\n", DIGITS_TO_SIZE_IN_BYTES_ALL);
-        char header_buffer[DIGITS_TO_SIZE_IN_BYTES_ALL]; 
-        bzero(header_buffer, DIGITS_TO_SIZE_IN_BYTES_ALL);
-        n = read(connect_id, header_buffer, DIGITS_TO_SIZE_IN_BYTES_ALL);
+        char* buffer;
+        n = read(connect_id, buffer, DEFAUL_SIZE);
         if (n < 0) perror("ERROR reading from socket");
-        int int_header_buffer = 255;
-        try{
-            int_header_buffer = chars_to_int(header_buffer);
-            printf("int_header_buffer: %d\n", int_header_buffer);
-        }
-        catch (int e)
-        {
-            printf("An exception occurred. Exception Nr. %d\n", e);            
-            printf("header_buffer: %s\n", header_buffer);
-        }*/
-
-        int int_header_buffer = DEFAUL_SIZE;
-        char buffer[int_header_buffer];
-        bzero(buffer, int_header_buffer);
-        n = read(connect_id, buffer, int_header_buffer);
-        if (n < 0) perror("ERROR reading from socket");
-        /*printf("buffer: %s\n", buffer);
-        printf("sizeof buffer: %d\n", sizeof(buffer));*/
+        
         chars mess_unwrap(buffer);
         cout<<"mess_unwrap: "<<mess_unwrap<<endl;
         list<chars> test = this->protocol->unwrap(mess_unwrap);
@@ -139,16 +177,22 @@ void Server::new_client_connection(int connect_id){
         this->protocol->print_list_str(test);
         int var = 0;
         chars word = "";
+        chars word2 = "";
         for (auto v : test){
             var++;
             if (var == 2){
                 word = v;
             }
         }
-        /*auto test_front = test.begin();
-        advance(test_front, 2);*/
-        cout<<"word: "<<word<<endl;
-        this->db->insert_node(word);
+        var = 0;
+        for (auto v : test){
+            var++;
+            if (var == 3){
+                word2 = v;
+            }
+        }
+        //this->db->insert_node(word);
+        this->db->insert_relation(word, word2);
 
         chars messa = "";
         if(strlen(buffer) > 0){
@@ -183,9 +227,17 @@ void Server::connection(){
             exit(EXIT_FAILURE);
         }
         printf("Client connected !!! \n");
-        int size_table_clients = table_clients.size();
-        table_clients[size_table_clients + 1] = ConnectFD;
-        this->print_table_clients();
+
+        char buffer[256];
+        bzero(buffer,256);
+        n = read(ConnectFD, buffer, 16);
+        if (n < 0) perror("ERROR reading from socket");
+
+        chars ip_server_connected(buffer);
+        pair<int, chars> element(ConnectFD, ip_server_connected);
+        int size_table = this->table_servers.size();
+        this->table_servers[size_table + 1] = element;
+        this->print_table_servers();
 
 
         thread t(&Server::new_client_connection, this, ConnectFD);
@@ -204,6 +256,33 @@ void Server::connection(){
         /*}*/
 
     }
+}
+
+void Server::read_server()
+{
+    for(;;)
+    {
+        n = write(this->SocketFD, this->ip_myself, 15);
+        if (n < 0) perror("ERROR writing to socket");
+
+        printf("Enter a message to server: ");
+        scanf("%s" , this->message);
+        chars messa = this->protocol->wrap("_l", "",this->message, "");
+
+        n = write(this->SocketFD, messa.c_str(), messa.size());
+        if (n < 0) perror("ERROR writing to socket");
+        
+        bzero(this->buffer, 255);
+        this->message_server = read(this->SocketFD, this->buffer, 255);
+        if (this->message_server < 0) perror("ERROR reading from socket");
+
+        list<chars> test = this->protocol->unwrap(this->buffer);
+        cout<<"Message of client:"<<endl;
+        this->protocol->print_list_str(test);
+    }
+
+    shutdown(this->SocketFD, SHUT_RDWR);
+    close(this->SocketFD);
 }
 
 int Server::split(const string txt, vector<string> &strs, char ch)
@@ -227,7 +306,7 @@ void Server::send_data_to_server(int socket, string bigrama){
     if (n < 0) perror("ERROR writing to socket");
 }
 
-void Server::load_data(){
+/*void Server::load_data(){
     printf("load_data \n");
     ifstream bigramas(this->path_bigramas);
 
@@ -256,7 +335,7 @@ void Server::load_data(){
                 }
             }
 
-            int socket_id = this->table_clients[server_counter];
+            int socket_id = this->table_servers[server_counter];
             printf("socket_id: %d\n", socket_id);
             this->send_data_to_server(socket_id, line);
             previous_first_word = line_vec[0];
@@ -265,4 +344,4 @@ void Server::load_data(){
         }
         bigramas.close();
     }
-}
+}*/

@@ -23,9 +23,9 @@ class Client{
         struct sockaddr_in stSockAddr;
 
         int Res;
-        int SocketFD;
         int n;
         int message_server;
+        int SocketFD;
         int port;
         char const* ip_address;
 
