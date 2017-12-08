@@ -34,7 +34,7 @@ int main(int argc, char const *argv[])
     cout<<endl<<"PARAMETERS TO SERVER"<<endl<<endl;
     test.print_list_str(unwrap_mess);*/
 
-    int port = 1101;
+    /*int port = 1101;
     char const* IP_SERVER = "192.168.160.177";
     char const* IP_MYSELF = "192.168.160.177";
     chars path_bigramas = "../en.wiki.big";
@@ -56,13 +56,18 @@ int main(int argc, char const *argv[])
         c->read_server();
     }
     else
-        cout<<"Please insert a value to execute server(s) or client(c) "<<endl;
+        cout<<"Please insert a value to execute server(s) or client(c) "<<endl;*/
 
-    /*Connection test;
-    test.find_node("Guyana");
-    test.insert_relation("EEUU","Mexico");*/
+    Connection test;
+    //test.insert_node("Peru");
+    //test.find_node("Guyana");
+    //test.insert_relation("EEUU","Mexico");
+    test.insert_attribute("Brazil","sinonimo","Colombia");
+    test.find_attribute("Brazil");
 
     cout<<endl<<endl;
+
+
     return 0;
 }
 

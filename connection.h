@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <string>
+#include <vector>
 #include <string.h>
 
 using namespace std;
@@ -20,6 +21,26 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
   return 0;
 }
 
+static int callback_attribute(void *data, int argc, char **argv, char **azColName){
+	vector< vector<string> > *records = static_cast< vector< vector<string> >* >(data);
+	try {
+    	records->emplace_back(argv, argv + argc);
+	}
+	catch (...) {
+	// abort select on failure, don't let exception propogate thru sqlite3 call-stack
+		return 1;
+	}
+	return 0;
+   /*int i;
+   fprintf(stderr, "%s: ", (const char*)data);
+   
+   for(i = 0; i<argc; i++){
+      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+   }
+   
+   printf("\n");*/
+}
+
 class Connection{
   public:
 
@@ -34,6 +55,9 @@ class Connection{
     string find_node(string attr);
 
     void insert_relation(string attr1, string attr2);
+
+    void insert_attribute(string attr, string name_attribute, string name_value);
+    void find_attribute(string attr);
 
     ~Connection(){
       sqlite3_close(db);
@@ -145,4 +169,42 @@ void Connection::insert_relation(string attr1, string attr2)
       fprintf(stdout, "Operation done successfully\n");
    }
 
+}
+
+void Connection::insert_attribute(string attr, string name_attribute, string value_attribute){
+	string id_node = find_node(attr);
+
+	sql = "insert into attributes (node_id,name_attribute,value) values('"+id_node+"','"+name_attribute+"','"+value_attribute+"');";
+	rc = sqlite3_exec(db, sql.c_str(), callback,0, &zErrMsg);
+	if( rc != SQLITE_OK ) {
+      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+   	} else {
+      fprintf(stdout, "Operation done successfully\n");
+   	}
+   	cout<<"Attributes:"<<endl;
+   	cout<<id_node<<","<<id_node<<","<<name_attribute<<","<<value_attribute<<endl;
+}
+
+void Connection::find_attribute(string attr){
+	vector< vector<string> > records;
+	string id_node = find_node(attr);
+	sql = "select * from attributes where node_id ='"+id_node+"';";
+  	char* data;
+  	const char *cstr_sql = sql.c_str();
+
+  	rc = sqlite3_exec(db, cstr_sql, callback_attribute, &records, &zErrMsg);
+
+  	for(int i=0; i<records.size(); i++){
+  		for(int j=0; j<records[i].size(); j++){
+  			cout<<records[i][j]<<" ";
+  		}
+  		cout<<endl;
+  	}
+  	if( rc != SQLITE_OK ) {
+     fprintf(stderr, "SQL error: %s\n", zErrMsg);
+     sqlite3_free(zErrMsg);
+  } else {
+     fprintf(stdout, "Operation done successfully\n");
+  }
 }
