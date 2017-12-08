@@ -177,13 +177,22 @@ void Server::new_client_connection(int connect_id){
         this->protocol->print_list_str(test);
         int var = 0;
         chars word = "";
+        chars word2 = "";
         for (auto v : test){
             var++;
             if (var == 2){
                 word = v;
             }
         }
-        this->db->insert_node(word);
+        var = 0;
+        for (auto v : test){
+            var++;
+            if (var == 3){
+                word2 = v;
+            }
+        }
+        //this->db->insert_node(word);
+        this->db->insert_relation(word, word2);
 
         chars messa = "";
         if(strlen(buffer) > 0){
@@ -258,7 +267,7 @@ void Server::read_server()
 
         printf("Enter a message to server: ");
         scanf("%s" , this->message);
-        chars messa = this->protocol->wrap("_n", "",this->message, "");
+        chars messa = this->protocol->wrap("_l", "",this->message, "");
 
         n = write(this->SocketFD, messa.c_str(), messa.size());
         if (n < 0) perror("ERROR writing to socket");
