@@ -198,7 +198,16 @@ vector<string> Connection::find_relations(string attr){
   attr = aux;
   // tmp.push_back(aux);
   string node_id = find_node(attr);
-  sql = "select * from relations where node1 ='"+node_id+"';";
+  sql = "select node2 from relations inner join nodes on relations.node1 = nodes.id where node1 = 1;";
+  rc = sqlite3_exec(db, sql.c_str(), callback,0, &zErrMsg);
+  if( rc != SQLITE_OK ) {
+      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+   	} else {
+      fprintf(stdout, "Operation done successfully\n");
+   	}
+
+
   return tmp;
 
 }
