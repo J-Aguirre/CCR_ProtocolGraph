@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
 
-    //Protocol test;
+    /*Protocol test;
 
 	/*cout << test.wrap("_n", "", "Peru", "synonyms:Ecuador,Chile,Uruguay") << endl;
 	cout << test.wrap("_l", "", "Peru,Bolivia", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana") << endl;
@@ -20,7 +20,8 @@ int main(int argc, char const *argv[])
     cout << test.wrap("nn", "1", "", "") <<endl;
     cout << test.wrap("ll", "1", "", "") <<endl;
     cout << test.wrap("qq", "2", "Peru,Bolivia,Chile,Ecuador", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana") <<endl;
-    cout << test.wrap("pp", "2", "Peru,Bolivia,Chile,Ecuador;Ecuador,Chile,Peru;Brasil,Colombia,Paraguay", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana") <<endl;*/
+    cout << test.wrap("pp", "2", "Peru,Bolivia,Chile,E/cuador;Ecuador,Chile,Peru;Brasil,Colombia,Paraguay", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana") <<endl;
+	cout << test.wrap("cc", "", "0,1,4,5", "") <<endl;
 
     /*list<chars> unwrap_mess = test.unwrap("_n100040030Perusynonyms:Ecuador,Chile,Uruguay");
     list<chars> unwrap_mess = test.unwrap("_l100200078Peru,Bolivia,Ecuadorsynonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Uruguay");
@@ -30,6 +31,7 @@ int main(int argc, char const *argv[])
     list<chars> unwrap_mess = test.unwrap("_s100000000");
     list<chars> unwrap_mess = test.unwrap("ll100000000");
     list<chars> unwrap_mess = test.unwrap("pp200700121Peru,Bolivia,Chile,Ecuador;Ecuador,Chile,Peru;Brasil,Colombia,Paraguaysynonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana");
+	list<chars> unwrap_mess = test.unwrap("cc1000700000,1,4,5");
 
     cout<<endl<<"PARAMETERS TO SERVER"<<endl<<endl;
     test.print_list_str(unwrap_mess);*/
@@ -62,12 +64,17 @@ int main(int argc, char const *argv[])
     // bool var_rt;
     // var_rt = test.insert_node("GuyANA");
     // cout <<"ok? -> "<< var_rt<<endl;
-    // test.find_relations("Peru");
+    // test.insert_node("Peru");
+    // bool a = test.insert_node("uruguay");
+    // test.find_node_id("URUguay");
+    vector<string> relations = test.find_relations("uruguay");
+    for(int i=0; i<relations.size(); i++)
+    	cout<<relations[i]<<" ";
 
     // test.find_node("Guyana");
-    test.insert_relation("peru","Colombia");
+  	//test.insert_relation("uruguay","colommbia");
 
-    // cout<<endl<<endl;
+    cout<<endl<<endl;
     return 0;
 }
 
