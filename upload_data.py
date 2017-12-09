@@ -24,19 +24,8 @@ def sum_values_ascii(word):
 
 def filter_allowed(line):
     value = True
-    print "line: ", line
+
     for l in line:
-        print "l: ", l
-        print "ord('a'): ", ord('a')
-        print "ord(l): ", ord(l)
-        print "ord('z'): ", ord('z')
-        print "\n"
-        print "ord('A'): ", ord('A')
-        print "ord(l): ", ord(l)
-        print "ord('A'): ", ord('A')
-        print "ord(" "): ", ord(" ")
-        print "\n"
-        print "\n"
         if ((ord(l) >= ord('a') and ord(l) <= ord('z')) or
                 (ord(l) >= ord('A') and ord(l) <= ord('Z')) or
                 ord(l) == ord(" ") or ord(l) == ord("\n")):
@@ -44,27 +33,59 @@ def filter_allowed(line):
         else:
             value = False
             break
-    print "------------------------------------"
+    # print "------------------------------------"
 
     return value
 
 
 def insert_node_db(word):
-    print "word: ", word
-    cursor.execute('''insert into nodes(name) values(:word)''', {'word': word})
-    print "word inserted"
-    DB.commit()
+    # print "word: ", word
+    idd = None
+
+    try:
+        cursor.execute(
+            '''insert into nodes(name) values(:word)''',
+            {'word': word})
+        # print "word inserted"
+        return True, idd
+    except:
+        print "NODE REPEATED!!!"
+        nodes = cursor.execute(
+            '''select id from nodes where name = :word''', {'word': word}
+        )
+        for n in nodes:
+            idd = n
+        # print "idd: ", idd
+        return False, idd[0]
+    # DB.commit()
 
 
-def insert_node(word):
-    value_ascii = sum_values_ascii(word)
-    print "value_ascii", value_ascii
+def insert_relation_db(node1, node2):
+    # print "INSERT_RELATION_DB!!! "
+    cursor.execute(
+        '''insert into relations(node1, node2) values(:node1, :node2)''',
+        {'node1': node1, 'node2': node2}
+    )
+    # print "relation inserted"
+    # DB.commit()
+
+
+def insert_nodes(words):
+    value_ascii = sum_values_ascii(words[0])
+    # print "value_ascii", value_ascii
     servers = which_servers(value_ascii)
-    print "servers: ", servers
+    # print "servers: ", servers
 
     for s in servers:
         if SERVER == s:
-            insert_node_db(word)
+            answer, id_n = insert_node_db(words[0])
+            id_node_1 = cursor.lastrowid if answer else id_n
+            # print "WILL INSERT NODE 2!!!!"
+            answer, id_n = insert_node_db(words[1])
+            id_node_2 = cursor.lastrowid if answer else id_n
+            # print "ID_NODE_1: ", id_node_1
+            # print "ID_NODE_2: ", id_node_2
+            insert_relation_db(id_node_1, id_node_2)
 
 
 def read_file(file_name):
@@ -73,21 +94,19 @@ def read_file(file_name):
         while True:
             line = f.readline()
             if line:
-                print "line before: ", line
+                # print "line before: ", line
                 if filter_allowed(line):
                     # continue
-                    print "line after: ", line
+                    # print "line after: ", line
                     words = line.split(" ")
                     print "words: ", words
-                    insert_node(words[0])
-                    insert_node(words[1])
+                    insert_nodes(words)
             else:
                 break
 
-    # DB.commit()
+    DB.commit()
 
 
 if __name__ == "__main__":
     read_file('/home/lalo/college/networking/FinalProtocolGraph/en.wiki.big')
     # read_file('/home/lalo/college/networking/FinalProtocolGraph/test.txt')
-    # print "sum_values_ascii: ", sum_values_ascii("hola")
