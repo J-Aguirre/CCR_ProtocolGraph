@@ -205,6 +205,7 @@ vector<string> Connection::find_relations(string attr){
 
 void Connection::insert_attribute(string attr, string name_attribute, string value_attribute){
 	string id_node = find_node(attr);
+	attr = toLower(attr);
 
 	sql = "insert into attributes (node_id,name_attribute,value) values('"+id_node+"','"+name_attribute+"','"+value_attribute+"');";
 	rc = sqlite3_exec(db, sql.c_str(), callback,0, &zErrMsg);
@@ -220,6 +221,8 @@ void Connection::insert_attribute(string attr, string name_attribute, string val
 
 void Connection::find_attribute(string attr){
 	vector< vector<string> > records;
+	attr = toLower(attr);
+
 	string id_node = find_node(attr);
 	sql = "select * from attributes where node_id ='"+id_node+"';";
   	char* data;
