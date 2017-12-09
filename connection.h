@@ -7,22 +7,17 @@
 
 using namespace std;
 
-string id;
 static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
-  id="";
-  int i;
-  for(i = 0; i<argc; i++) {
-    //id = argv[0];
-    printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-  }
-  printf("\n");
-  id = argv[0];
+	for(int i = 0; i<argc; i++) {
+		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+  	}
+  	printf("\n");
 
-  return 0;
+  	return 0;
 }
 
-static int callback_attribute(void *data, int argc, char **argv, char **azColName){
-	vector< vector<string> > *records = static_cast< vector< vector<string> >* >(data);
+static int callback_find(void *data, int argc, char **argv, char **azColName) {
+  	vector< vector<string> > *records = static_cast< vector< vector<string> >* >(data);
 	try {
     	records->emplace_back(argv, argv + argc);
 	}
@@ -31,14 +26,6 @@ static int callback_attribute(void *data, int argc, char **argv, char **azColNam
 		return 1;
 	}
 	return 0;
-   /*int i;
-   fprintf(stderr, "%s: ", (const char*)data);
-   
-   for(i = 0; i<argc; i++){
-      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-   }
-   
-   printf("\n");*/
 }
 
 class Connection{
@@ -53,7 +40,8 @@ class Connection{
     bool insert_node(string attr);
     void update_node(string attr, string new_attr);
     void delete_node(string attr);
-    string find_node(string attr);
+    string find_node_id(string attr);
+    string find_node_name(string id);
 
     bool insert_relation(string attr1, string attr2);
     vector<string> find_relations(string attr);
@@ -102,30 +90,48 @@ bool Connection::insert_node(string attr){
   }
 }
 
-string Connection::find_node(string attr){
-  sql = "select * from nodes where name ='"+attr+"';";
-  // cout <<sql<<endl;
-  const char *cstr_sql = sql.c_str();
+string Connection::find_node_id(string attr){
+	vector< vector<string> > records;
+	string id = "";
+	attr = toLower(attr);
 
-  string ids;
-  rc = sqlite3_exec(db, cstr_sql, callback,&ids, &zErrMsg);
-  //cout<<"Dato "<<id<<endl;
-  if( rc != SQLITE_OK ) {
-     fprintf(stderr, "SQL error: %s\n", zErrMsg);
-     sqlite3_free(zErrMsg);
-  } else {
-     fprintf(stdout, "Operation done successfully\n");
-  }
+	sql = "select id from nodes where name ='"+attr+"';";
+	rc = sqlite3_exec(db, sql.c_str(), callback_find, &records, &zErrMsg);
 
-  if(id != ""){
-    cout<<"id: "<<id<<endl;
-    return id;
-  }
-  else{
-    id = "";
-    cout<<"id"<<id<<endl;
-    return id;
-  }
+	if( rc != SQLITE_OK ) {
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	} else {
+		fprintf(stdout, "Operation done successfully\n");
+	}
+
+	int i=0, j=0;
+	if(i<records.size() && j<records[i].size())
+		id = records[0][0];
+	cout<<"ID: "<<id<<endl;
+	return id;
+}
+
+string Connection::find_node_name(string id){
+  	vector< vector<string> > records;
+	string name = "";
+	//attr = toLower(attr);
+
+	sql = "select name from nodes where id ='"+id+"';";
+	rc = sqlite3_exec(db, sql.c_str(), callback_find, &records, &zErrMsg);
+
+	if( rc != SQLITE_OK ) {
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	} else {
+		fprintf(stdout, "Operation done successfully\n");
+	}
+
+	int i=0, j=0;
+	if(i<records.size() && j<records[i].size())
+		name = records[0][0];
+	cout<<"NAME: "<<id<<endl;
+	return name;
 }
 
 void Connection::update_node(string attr, string new_attr){
@@ -161,25 +167,14 @@ bool Connection::insert_relation(string attr1, string attr2)
 {
   attr1 = toLower(attr1);
   attr2 = toLower(attr2);
-  string id1 = find_node(attr1);
-  string id2 = find_node(attr2);
+  string id1 = find_node_id(attr1);
+  string id2 = find_node_id(attr2);
 
   cout<<id1<<"  "<<id2<<endl;
   if(id1 == "" || id2 == ""){
     cout <<"no exite un valor"<<endl;
     return 0;
   }
-  /*if(id1 == ""){
-    insert_node(attr1);
-    cout<<"paso"<<endl;
-    id1 = find_node(attr1);
-    cout<<"paso2"<<endl;
-  }
-
-  if(id2 == ""){
-    insert_node(attr2);
-    id2 = find_node(attr2);
-  }*/
 
   sql = "insert into relations (node1,node2) values('"+id1+"','"+id2+"');";
   rc = sqlite3_exec(db, sql.c_str(), callback,0, &zErrMsg);
@@ -193,31 +188,35 @@ bool Connection::insert_relation(string attr1, string attr2)
 }
 
 vector<string> Connection::find_relations(string attr){
-  vector<string> tmp;
-  string aux = toLower(attr);
-  attr = aux;
-  // tmp.push_back(aux);
-  string node_id = find_node(attr);
-  sql = "select node2 from relations inner join nodes on relations.node1 = nodes.id where node1 = 1;";
-  rc = sqlite3_exec(db, sql.c_str(), callback,0, &zErrMsg);
-  if( rc != SQLITE_OK ) {
-      fprintf(stderr, "SQL error: %s\n", zErrMsg);
-      sqlite3_free(zErrMsg);
-   	} else {
-      fprintf(stdout, "Operation done successfully\n");
-   	}
+	vector< vector<string> > records;
+  	vector<string> nodes_two;
+	attr = toLower(attr);
+	string node_id = find_node_id(attr);
+	sql = "select node2 from relations inner join nodes on relations.node1 = nodes.id where node1 = '"+node_id+"';";
+	rc = sqlite3_exec(db, sql.c_str(), callback_find, &records, &zErrMsg);
 
+	for(int i=0; i<records.size(); i++){
+		for(int j=0; j<records[i].size(); j++){
+			nodes_two.push_back(records[i][j]);
+		}
+	}
 
-  return tmp;
+	if( rc != SQLITE_OK ) {
+	  	fprintf(stderr, "SQL error: %s\n", zErrMsg);
+	  	sqlite3_free(zErrMsg);
+	} else {
+	  	fprintf(stdout, "Operation done successfully\n");
+	}
 
+	return nodes_two;
 }
 
 void Connection::insert_attribute(string attr, string name_attribute, string value_attribute){
-	string id_node = find_node(attr);
+	string id_node = find_node_id(attr);
 	attr = toLower(attr);
 
 	sql = "insert into attributes (node_id,name_attribute,value) values('"+id_node+"','"+name_attribute+"','"+value_attribute+"');";
-	rc = sqlite3_exec(db, sql.c_str(), callback,0, &zErrMsg);
+	rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ) {
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
@@ -232,12 +231,12 @@ void Connection::find_attribute(string attr){
 	vector< vector<string> > records;
 	attr = toLower(attr);
 
-	string id_node = find_node(attr);
-	sql = "select * from attributes where node_id ='"+id_node+"';";
+	string id_node = find_node_id(attr);
+	sql = "select name_attribute,value from attributes where node_id ='"+id_node+"';";
   	char* data;
   	const char *cstr_sql = sql.c_str();
 
-  	rc = sqlite3_exec(db, cstr_sql, callback_attribute, &records, &zErrMsg);
+  	rc = sqlite3_exec(db, cstr_sql, callback_find, &records, &zErrMsg);
 
   	for(int i=0; i<records.size(); i++){
   		for(int j=0; j<records[i].size(); j++){
@@ -246,9 +245,9 @@ void Connection::find_attribute(string attr){
   		cout<<endl;
   	}
   	if( rc != SQLITE_OK ) {
-     fprintf(stderr, "SQL error: %s\n", zErrMsg);
-     sqlite3_free(zErrMsg);
-  } else {
-     fprintf(stdout, "Operation done successfully\n");
-  }
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+  	} else {
+     	fprintf(stdout, "Operation done successfully\n");
+  	}
 }

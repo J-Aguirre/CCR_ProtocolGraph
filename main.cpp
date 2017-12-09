@@ -60,18 +60,21 @@ int main(int argc, char const *argv[])
     // else
     //     cout<<"Please insert a value to execute server(s) or client(c) "<<endl;
 
-     Connection test;
+    Connection test;
     // bool var_rt;
     // var_rt = test.insert_node("GuyANA");
     // cout <<"ok? -> "<< var_rt<<endl;
     // test.insert_node("Peru");
-     bool a = test.insert_node("brazil");
-     //test.find_relations("Colombia");
+    // bool a = test.insert_node("uruguay");
+    // test.find_node_id("URUguay");
+    vector<string> relations = test.find_relations("uruguay");
+    for(int i=0; i<relations.size(); i++)
+    	cout<<relations[i]<<" ";
 
     // test.find_node("Guyana");
-  	 //test.insert_relation("Peru","Colombia");
+  	//test.insert_relation("uruguay","colommbia");
 
-    // cout<<endl<<endl;
+    cout<<endl<<endl;
     return 0;
 }
 
