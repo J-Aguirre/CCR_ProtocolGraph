@@ -2,7 +2,8 @@ import sqlite3
 
 SERVER = 0
 RULE = 3
-DB = sqlite3.connect('protocol_db.db')
+DB = sqlite3.connect(
+    '/home/lalo/college/networking/FinalProtocolGraph/protocol_db.db')
 cursor = DB.cursor()
 
 
@@ -49,7 +50,7 @@ def insert_node_db(word):
         # print "word inserted"
         return True, idd
     except:
-        print "NODE REPEATED!!!"
+        # print "NODE REPEATED!!!"
         nodes = cursor.execute(
             '''select id from nodes where name = :word''', {'word': word}
         )
