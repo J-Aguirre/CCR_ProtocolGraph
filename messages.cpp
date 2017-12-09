@@ -259,3 +259,19 @@ list<chars> unwrap_sentence_answer(chars message){
 
     return answer;
 }
+
+list<chars> unwrap_info_servers_answer(chars message){
+    list<chars> answer;
+    chars action = message.substr(0, 2);
+
+    chars word_size_str = message.substr(3, 4);
+    int word_size = stoi(word_size_str);
+
+    message = message.substr(11);
+    chars words = message.substr(0, word_size);
+    list<chars> answer_servers = splitt(words, ',');
+
+    answer.merge(answer_servers);
+
+    return answer;    
+}
