@@ -56,7 +56,7 @@ class Connection{
 
 Connection::Connection(){
      /* Open database */
-     rc = sqlite3_open("protocol_db.db", &db);
+     rc = sqlite3_open("/home/lalo/college/networking/FinalProtocolGraph/protocol_db.db", &db);
      if(rc) {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
      } else {
@@ -192,7 +192,7 @@ vector<string> Connection::find_relations(string attr){
   	vector<string> nodes_two;
 	attr = toLower(attr);
 	string node_id = find_node_id(attr);
-	sql = "select node2 from relations inner join nodes on relations.node1 = nodes.id where node1 = '"+node_id+"';";
+	sql = "select n2.name from relations inner join nodes as n1 on relations.node1 = n1.id inner join nodes as n2 on relations.node2 = n2.id where node1 = '"+node_id+"';";
 	rc = sqlite3_exec(db, sql.c_str(), callback_find, &records, &zErrMsg);
 
 	for(int i=0; i<records.size(); i++){

@@ -67,11 +67,14 @@ int main(int argc, char const *argv[])
     // test.insert_node("Peru");
     // bool a = test.insert_node("uruguay");
     // test.find_node_id("URUguay");
-    vector<string> relations = test.find_relations("uruguay");
+    cout<<"RELATIONS: "<<endl;
+    vector<string> relations = test.find_relations("nerd");
     for(int i=0; i<relations.size(); i++)
-    	cout<<relations[i]<<" ";
+        cout<<relations[i]<<" ";
+        /*cout<<test.find_node_name(relations[i])<<" ";*/
+    /*cout<<"relations[i].size(): "<<relations.size()<<endl;*/
 
-    // test.find_node("Guyana");
+    // cout<<"Found: "<<test.find_node_id("Peru")<<endl;
   	//test.insert_relation("uruguay","colommbia");
 
     cout<<endl<<endl;
