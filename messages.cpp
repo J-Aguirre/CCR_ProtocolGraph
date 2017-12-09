@@ -260,7 +260,7 @@ list<chars> unwrap_sentence_answer(chars message){
     return answer;
 }
 
-list<chars> unwrap_info_answer(chars message){
+list<chars> unwrap_info_servers_answer(chars message){
     list<chars> answer;
     chars action = message.substr(0, 2);
 
