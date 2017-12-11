@@ -46,6 +46,8 @@ class Server {
         Connection* db;
         map<int, pair<int, chars> > table_servers; // <name_number, number_socket>
         bool type_server = 0; // 1: server_slave, 0: server_master
+        bool STATE_REQUEST; // if server is doing some request
+        const char* REQUEST;
 
         Server();
         Server(char const*, int, char const*);
@@ -53,12 +55,13 @@ class Server {
 
         void print_table_servers();
         void connection();
-        void read_from_server();
-        void new_client_connection(int, int, const char*);
+        void read_from_server_master();
+        void new_client_connection(int, int);
         int split(const string txt, vector<string> &strs, char ch);
         int print_vec_s(vector<string>);
         void send_data_to_server(int socket, string bigrama);
         chars access_list(list<chars>, int);
+        void analize_request_and_send(chars);
 };
 
 Server::Server(){}
@@ -113,6 +116,8 @@ Server::Server(char const* ip, int port, char const* ip_myself)
 Server::Server(int port, const char* ip_myself){
     this->protocol = new Protocol();
     this->db = new Connection();
+    this->STATE_REQUEST = false;
+    printf("constructor STATE_REQUEST : %d\n", this->STATE_REQUEST);
 
     this->SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     this->port = port;
@@ -180,23 +185,44 @@ chars Server::access_list(list<chars> test, int pos){
 }
 
 
-void Server::new_client_connection(int connect_id, int num_server, const char* action){
+void Server::new_client_connection(int connect_id, int num_server){
+    printf("num_server: %d\n", num_server);
+
     for(;;)
     {
-        /*const char* bufferr = "Got it";*/
         int stat;
+        const char* type_message = "";
+        printf("STATE_REQUEST: %d\n", this->STATE_REQUEST);
 
-        do{
-            stat = write(connect_id, &num_server, sizeof(int));
-        }while(stat<0);
-        if (stat  < 0)
-            printf("Some problem writing NUMBER_SERVER in slave server\n");
+        if(this->STATE_REQUEST == true){
+            type_message = "request";
+            do{
+                stat = write(connect_id, &type_message, sizeof(char));
+            }while(stat<0);
+            if(stat < 0)
+                printf("Someproblem writing a TYPE_MESSAGE in slave server\n");
 
-        do{
-            stat = write(connect_id, &action, sizeof(char) * 2);
-        }while(stat<0);
-        if (stat  < 0)
-            printf("Some problem writing ACTION in slave server\n");
+            do{
+                stat = write(connect_id, &this->REQUEST, sizeof(char));
+            }while(stat<0);
+            if(stat  < 0)
+                printf("Some problem writing a REQUEST in slave server\n");
+        }
+        else{
+            type_message = "num_server";
+            printf("type_message: %s\n", type_message);
+            do{
+                stat = write(connect_id, &type_message, sizeof(char));
+            }while(stat<0);
+            if(stat < 0)
+                printf("Someproblem writing a TYPE_MESSAGE in slave server\n");
+
+            do{
+                stat = write(connect_id, &num_server, sizeof(int));
+            }while(stat<0);
+            if (stat  < 0)
+                printf("Some problem writing NUMBER_SERVER in slave server\n");
+        }
 
 
     // do
@@ -279,9 +305,9 @@ void Server::connection(){
         int num_server = this->table_servers.size();
         this->table_servers[num_server] = element;
         this->print_table_servers();
-        const char* action = "_n";
-
-        thread t(&Server::new_client_connection, this, ConnectFD, num_server, action);
+        const char* request = "_n100040030Perusynonyms:Ecuador,Chile,Uruguay"; // example of request _n
+        printf("this->STATE_REQUEST: %s\n", this->STATE_REQUEST);
+        thread t(&Server::new_client_connection, this, ConnectFD, num_server);
         t.detach();
 
         printf("Waiting for another connection ... \n");        
@@ -289,11 +315,14 @@ void Server::connection(){
     }
 }
 
-void Server::analize_request_and_send(chars action, here comploete pachage){
-    if (action == "_n"){}
+void Server::analize_request_and_send(chars request){
+
+    if (request.substr(0, 2) == "_n"){
+        cout<<"request: "<<request<<endl;
+    }
 }
 
-void Server::read_from_server()
+void Server::read_from_server_master()
 {
     int stat;
 
@@ -301,26 +330,38 @@ void Server::read_from_server()
     {
         n = write(this->SocketFD, this->ip_myself, 15);
         if (n < 0) perror("ERROR writing to socket");
+        printf("nsadsad: %d asdad\n", n);
 
-        //(S) READING NUMBER SERVER FROM SERVER
-        int bufferr = 0;
+            printf("inside loop to get type_message_buff");
+        const char* type_message_buff = "";
         do{
-            stat = read(this->SocketFD, &bufferr, 4);
+            stat = read(this->SocketFD, &type_message_buff, 10);
         }while(stat<0);
 
-        this->number_server = bufferr;
-        printf("NUMBER_SERVER MYSELF: %d\n", this->number_server);
-        //(E) READING NUMBER SERVER FROM SERVER
+        printf("type_message_buff: %s\n", type_message_buff);
 
+        if (type_message_buff == "request"){
+            //(S) READING ALL MESSAGE REQUEST FROM SERVER
+            const char* buffer_c = "";
+            do{
+                stat = read(this->SocketFD, &buffer_c, 2);
+            }while(stat<0);
 
-        //(S) READING ALL MESSAGE REQUEST FROM SERVER
-        const char* buffer_c = "";
-        do{
-            stat = read(this->SocketFD, &buffer_c, 2);
-        }while(stat<0);
+            printf("ACTION MYSELF: %s\n", buffer_c);
+            //(E) READING ALL MESSAGE REQUEST FROM SERVER
+        }
+        else{
 
-        printf("ACTION MYSELF: %s\n", buffer_c);
-        //(E) READING ALL MESSAGE REQUEST FROM SERVER
+            //(S) READING NUMBER SERVER FROM SERVER
+            int bufferr = 0;
+            do{
+                stat = read(this->SocketFD, &bufferr, 4);
+            }while(stat<0);
+
+            this->number_server = bufferr;
+            printf("NUMBER_SERVER MYSELF: %d\n", this->number_server);
+            //(E) READING NUMBER SERVER FROM SERVER
+        }
 
         printf("Enter a message to server: ");
         scanf("%s" , this->message);

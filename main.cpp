@@ -11,7 +11,8 @@ int main(int argc, char const *argv[])
 
     /*Protocol test;
 
-	/*cout << test.wrap("_n", "", "Peru", "synonyms:Ecuador,Chile,Uruguay") << endl;
+	cout << test.wrap("_n", "", "Peru", "synonyms:Ecuador,Chile,Uruguay") << endl;*/
+    /*
 	cout << test.wrap("_l", "", "Peru,Bolivia", "synonyms:Ecuador,Chile,Uruguay;synonyms:Ecuador,Chile,Uruguay;antonyms:Cusco,Inka,Peruvian;antonyms:Veracruz,Solis,Habana") << endl;
 	cout << test.wrap("_q", "2", "Peru", "") <<endl;
     cout << test.wrap("_p", "2", "Peru,Colombia,Ecuador", "synonyms,antonyms") <<endl;
@@ -49,7 +50,7 @@ int main(int argc, char const *argv[])
 
     if(strcmp(argv[1], "ss") == 0){
         Server* c = new Server(IP_SERVER, port, IP_MYSELF);
-        c->read_from_server();
+        c->read_from_server_master();
     }
 
     if(strcmp(argv[1], "c") == 0){
