@@ -94,7 +94,7 @@ Client::Client(char const* ip, int port)
 
     if (-1 == connect(this->SocketFD, (const struct sockaddr *)&this->stSockAddr, sizeof(struct sockaddr_in)))
     {
-        perror("connect failed");
+        perror("connect failed!!!!");
         close(this->SocketFD);
         exit(EXIT_FAILURE);
     }

@@ -26,11 +26,17 @@ class Server {
 
     public:
         struct sockaddr_in stSockAddr;
+        struct sockaddr_in stSockAddr_c;
         int Res;
+        int Res_c;
         int SocketFD;
+        int SocketFD_c;
         int port;
+        int port_c;
         char const* ip_address;
+        char const* ip_address_c;
         char const* ip_myself;
+        char const* ip_myself_c;
         int number_server;
         int message_server;
 
@@ -47,6 +53,7 @@ class Server {
         map<int, pair<int, chars> > table_servers; // <name_number, number_socket>
         bool type_server = 0; // 1: server_slave, 0: server_master
         bool STATE_REQUEST; // if server is doing some request
+        bool STATE_REQUEST_c; // if server is doing some request
         const char* REQUEST;
 
         Server();
@@ -56,12 +63,15 @@ class Server {
         void print_table_servers();
         void connection();
         void read_from_server_master();
-        void new_client_connection(int, int);
+        void new_server_slave_connection(int, int);
         int split(const string txt, vector<string> &strs, char ch);
         int print_vec_s(vector<string>);
         void send_data_to_server(int socket, string bigrama);
         chars access_list(list<chars>, int);
         void analize_request_and_send(chars);
+        void init_to_client(int, char const*);
+        void connection_c_to_s();
+        void new_client_connection(int);
 };
 
 Server::Server(){}
@@ -113,7 +123,46 @@ Server::Server(char const* ip, int port, char const* ip_myself)
 }
 
 
+void Server::init_to_client(int port_c, char const* ip_myself)
+{
+    this->STATE_REQUEST_c = false;
+    printf("constructor STATE_REQUEST_c : %d\n", this->STATE_REQUEST_c);
+
+    this->SocketFD_c = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    this->port_c = port_c;
+
+    if(-1 == this->SocketFD_c)
+    {
+        perror("can not create socket");
+        exit(EXIT_FAILURE);
+    }
+
+    memset(&this->stSockAddr_c, 0, sizeof(struct sockaddr_in));
+
+    this->stSockAddr_c.sin_family = AF_INET;
+    this->stSockAddr_c.sin_port = htons(this->port);
+    this->stSockAddr_c.sin_addr.s_addr = INADDR_ANY;
+
+    if(-1 == bind(this->SocketFD_c,(const struct sockaddr *)&this->stSockAddr_c, sizeof(struct sockaddr_in)))
+    {
+        perror("error bind failed");
+        close(this->SocketFD_c);
+        exit(EXIT_FAILURE);
+    }
+
+    if(-1 == listen(this->SocketFD_c, 10))
+    {
+        perror("error listen failed");
+        close(this->SocketFD_c);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Waiting for a connection ... \n");  
+}
+
+
 Server::Server(int port, const char* ip_myself){
+
     this->protocol = new Protocol();
     this->db = new Connection();
     this->STATE_REQUEST = false;
@@ -185,7 +234,7 @@ chars Server::access_list(list<chars> test, int pos){
 }
 
 
-void Server::new_client_connection(int connect_id, int num_server){
+void Server::new_server_slave_connection(int connect_id, int num_server){
     printf("num_server: %d\n", num_server);
 
     for(;;)
@@ -307,11 +356,94 @@ void Server::connection(){
         this->print_table_servers();
         const char* request = "_n100040030Perusynonyms:Ecuador,Chile,Uruguay"; // example of request _n
         printf("this->STATE_REQUEST: %s\n", this->STATE_REQUEST);
-        thread t(&Server::new_client_connection, this, ConnectFD, num_server);
+        thread t(&Server::new_server_slave_connection, this, ConnectFD, num_server);
         t.detach();
 
-        printf("Waiting for another connection ... \n");        
+        printf("Waiting for another connection ... \n");
+    }
+}
 
+void Server::new_client_connection(int connect_id){
+    for(;;)
+    {
+    // do
+    // {
+        char* buffer;
+        n = read(connect_id, buffer, DEFAUL_SIZE);
+        if (n < 0) perror("ERROR reading from socket");
+        
+        chars mess_unwrap(buffer);
+        cout<<"mess_unwrap: "<<mess_unwrap<<endl;
+        list<chars> test = this->protocol->unwrap(mess_unwrap);
+        cout<<"Message of client:"<<endl;
+        this->protocol->print_list_str(test);
+        int var = 0;
+        chars word = "";
+        chars word2 = "";
+        for (auto v : test){
+            var++;
+            if (var == 2){
+                word = v;
+            }
+        }
+        var = 0;
+        for (auto v : test){
+            var++;
+            if (var == 3){
+                word2 = v;
+            }
+        }
+        //this->db->insert_node(word);
+        this->db->insert_relation(word, word2);
+
+        chars messa = "";
+        if(strlen(buffer) > 0){
+            printf("Enter message to client: ");
+            scanf("%s" , this->message);
+            messa = this->protocol->wrap("_n", "", this->message, "");
+        }
+        else {
+            printf("Client desconnected !!! \n");
+            break;
+        }
+
+        n = write(connect_id, messa.c_str(), messa.size());
+        if (n < 0) perror("ERROR writing to socket");
+    }
+    // } while(buffer != "chao");
+    shutdown(connect_id, SHUT_RDWR);
+    close(connect_id);
+}
+
+
+void Server::connection_c_to_s(){
+
+    for(;;){
+        int ConnectFD = accept(this->SocketFD_c, NULL, NULL);
+        cout<<"this->SocketFD: "<<this->SocketFD_c<<endl;
+
+        if(0 > ConnectFD)
+        {
+            perror("error accept failed");
+            close(this->SocketFD_c);
+            exit(EXIT_FAILURE);
+        }
+        printf("Client connected !!! \n");
+
+        char buffer[256];
+        bzero(buffer,256);
+        n = read(ConnectFD, buffer, 16);
+        if (n < 0) perror("ERROR reading from socket");
+
+        /*chars ip_server_connected(buffer);
+        pair<int, chars> element(ConnectFD, ip_server_connected);
+        int size_table = this->table_servers.size();
+        this->table_servers[size_table + 1] = element;*/
+
+        thread t(&Server::new_client_connection, this, ConnectFD);
+        t.detach();
+
+        printf("Waiting for another connection ... \n");
     }
 }
 

@@ -37,24 +37,28 @@ int main(int argc, char const *argv[])
     cout<<endl<<"PARAMETERS TO SERVER"<<endl<<endl;
     test.print_list_str(unwrap_mess);*/
 
-    int port = 1100;
+    int port_servers = 1100;
+    int port_client = 1101;
     char const* IP_SERVER = "127.0.0.1";
     char const* IP_MYSELF = "127.0.0.1";
     chars path_wordnet = "../CCR.WN";
 
     if(strcmp(argv[1], "sm") == 0)
     {
-        Server* s = new Server(port, IP_MYSELF);
+        Server* s = new Server(port_servers, IP_MYSELF);
         s->connection();
+
+        s->init_to_client(port_client, IP_MYSELF);
+        s->connection_c_to_s();
     }
 
     if(strcmp(argv[1], "ss") == 0){
-        Server* c = new Server(IP_SERVER, port, IP_MYSELF);
+        Server* c = new Server(IP_SERVER, port_servers, IP_MYSELF);
         c->read_from_server_master();
     }
 
     if(strcmp(argv[1], "c") == 0){
-        Client* c = new Client(IP_SERVER, port);
+        Client* c = new Client(IP_SERVER, port_client);
         c->read_server();
     }
     else
