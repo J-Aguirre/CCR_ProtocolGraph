@@ -3,7 +3,7 @@ import sqlite3
 SERVER = 0
 RULE = 3
 DB = sqlite3.connect(
-    '/home/lalo/college/networking/FinalProtocolGraph/protocol_db.db')
+    'protocol_db.db')
 cursor = DB.cursor()
 
 
@@ -100,7 +100,7 @@ def read_file(file_name):
                     # continue
                     # print "line after: ", line
                     words = line.split(" ")
-                    print "words: ", words
+                    print ("words: ", words)
                     insert_nodes(words)
             else:
                 break
@@ -109,5 +109,5 @@ def read_file(file_name):
 
 
 if __name__ == "__main__":
-    read_file('/home/lalo/college/networking/FinalProtocolGraph/en.wiki.big')
+    read_file('/home/elard/Descargas/en.wikicoma.big')
     # read_file('/home/lalo/college/networking/FinalProtocolGraph/test.txt')
