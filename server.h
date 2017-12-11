@@ -17,6 +17,7 @@
 #include <iterator>
 /*#include "protocol.h"*/
 
+
 using namespace std;
 
 int DEFAUL_SIZE = 255;
@@ -58,11 +59,12 @@ class Server {
         int print_vec_s(vector<string>);
         void send_data_to_server(int socket, string bigrama);
         void load_data();
+        void verify_slaves();
 };
 
 Server::Server(){}
 
-Server::Server(char const* ip, int port, char const* ip_myself)
+Server::Server(char const* ip, int port, char const* ip_myself) //esclavo
 {
 
     this->protocol = new Protocol();
@@ -112,7 +114,7 @@ Server::Server(char const* ip, int port, char const* ip_myself)
 }
 
 
-Server::Server(int port){
+Server::Server(int port){ //maestro
     this->protocol = new Protocol();
     this->db = new Connection();
 
@@ -215,10 +217,17 @@ void Server::new_client_connection(int connect_id){
 
 void Server::connection(){
 
+    struct sockaddr_in client_addr;
+    socklen_t len;
+    char buffer[256];
+    cout<<"this->SocketFD: "<<this->SocketFD<<endl;
     for(;;){
 
-        int ConnectFD = accept(this->SocketFD, NULL, NULL);
-        cout<<"this->SocketFD: "<<this->SocketFD<<endl;
+        len = sizeof(client_addr);
+        int ConnectFD = accept(this->SocketFD, (struct sockaddr *)&client_addr, &len);
+        //int ConnectFD = accept(this->SocketFD, NULL, NULL);
+        
+        
 
         if(0 > ConnectFD)
         {
@@ -226,19 +235,21 @@ void Server::connection(){
             close(this->SocketFD);
             exit(EXIT_FAILURE);
         }
-        printf("Client connected !!! \n");
+        else printf("Client connected !!! \n");
 
-        char buffer[256];
+        
         bzero(buffer,256);
         n = read(ConnectFD, buffer, 16);
-        if (n < 0) perror("ERROR reading from socket");
-
+        if (n < 0) 
+            perror("ERROR reading from socket");
+        
         chars ip_server_connected(buffer);
         pair<int, chars> element(ConnectFD, ip_server_connected);
         int size_table = this->table_servers.size();
         this->table_servers[size_table + 1] = element;
         this->print_table_servers();
-
+        
+        cout<<"DONE"<<endl;
 
         thread t(&Server::new_client_connection, this, ConnectFD);
         t.detach();
@@ -260,10 +271,11 @@ void Server::connection(){
 
 void Server::read_server()
 {
+    n = write(this->SocketFD, this->ip_myself, 15);
+    //if (n < 0) perror("ERROR writing to socket");
+    if(n >= 0)
     for(;;)
     {
-        n = write(this->SocketFD, this->ip_myself, 15);
-        if (n < 0) perror("ERROR writing to socket");
 
         printf("Enter a message to server: ");
         scanf("%s" , this->message);
@@ -343,5 +355,16 @@ void Server::send_data_to_server(int socket, string bigrama){
             // printf ("%s\n", line.c_str());
         }
         bigramas.close();
+    }
+}*/
+
+/*void Server::verify_slaves()
+{
+    map<int, pair<int, chars> >::iterator it;
+    for(it=this->table_servers.begin(); it!=this->table_servers.end(); it++) {
+        //printf("%10d | %10d |%15s \n", it->first, it->second.first, it->second.second.c_str());
+        int error_code;
+        int error_code_size = sizeof(error_code);
+        getsockopt(socket_fd, SOL_SOCKET, SO_ERROR, &error_code, &error_code_size);
     }
 }*/
