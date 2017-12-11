@@ -212,7 +212,7 @@ void Server::new_client_connection(int connect_id, int num_server){
             type_message = "num_server";
             printf("type_message: %s\n", type_message);
             do{
-                stat = write(connect_id, &type_message, sizeof(char));
+                stat = write(connect_id, &type_message, sizeof(char)*10);
             }while(stat<0);
             if(stat < 0)
                 printf("Someproblem writing a TYPE_MESSAGE in slave server\n");
@@ -326,13 +326,14 @@ void Server::read_from_server_master()
 {
     int stat;
 
-    for(;;)
-    {
-        n = write(this->SocketFD, this->ip_myself, 15);
-        if (n < 0) perror("ERROR writing to socket");
+    /*for(;;)
+    {*/
+        do{
+            n = write(this->SocketFD, this->ip_myself, 15);
+        }while(n < 0);
+        if(n < 0) perror("ERROR writing to socket");
         printf("nsadsad: %d asdad\n", n);
 
-            printf("inside loop to get type_message_buff");
         const char* type_message_buff = "";
         do{
             stat = read(this->SocketFD, &type_message_buff, 10);
@@ -363,7 +364,13 @@ void Server::read_from_server_master()
             //(E) READING NUMBER SERVER FROM SERVER
         }
 
-        printf("Enter a message to server: ");
+        const char* message_buffer = "";
+        printf("Waiting for request from SERVER MASTER\n");
+        do{
+            stat = read(this->SocketFD, &message_buffer, 200);
+        }while(stat<0);
+
+        /*printf("Enter a message to server: ");
         scanf("%s" , this->message);
         chars messa = this->protocol->wrap("_n", "", this->message, "");
 
@@ -376,8 +383,8 @@ void Server::read_from_server_master()
 
         list<chars> test = this->protocol->unwrap(this->buffer);
         cout<<"Message of client:"<<endl;
-        this->protocol->print_list_str(test);
-    }
+        this->protocol->print_list_str(test);*/
+    /*}*/
 
     shutdown(this->SocketFD, SHUT_RDWR);
     close(this->SocketFD);

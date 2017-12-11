@@ -37,7 +37,7 @@ int main(int argc, char const *argv[])
     cout<<endl<<"PARAMETERS TO SERVER"<<endl<<endl;
     test.print_list_str(unwrap_mess);*/
 
-    int port = 1101;
+    int port = 1100;
     char const* IP_SERVER = "127.0.0.1";
     char const* IP_MYSELF = "127.0.0.1";
     chars path_wordnet = "../CCR.WN";
