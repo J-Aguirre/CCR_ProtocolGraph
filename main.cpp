@@ -36,41 +36,40 @@ int main(int argc, char const *argv[])
     cout<<endl<<"PARAMETERS TO SERVER"<<endl<<endl;
     test.print_list_str(unwrap_mess);*/
 
-    // int port = 1101;
-    // char const* IP_SERVER = "192.168.160.177";
-    // char const* IP_MYSELF = "192.168.160.177";
-    // chars path_bigramas = "../en.wiki.big";
-    // chars path_wordnet = "../CCR.WN";
+    int port = 1101;
+    char const* IP_SERVER = "127.0.0.1";
+    char const* IP_MYSELF = "127.0.0.1";
+    chars path_wordnet = "../CCR.WN";
 
-    // if(strcmp(argv[1], "sm") == 0)
-    // {
-    //     Server* s = new Server(port);
-    //     s->connection();
-    // }
+    if(strcmp(argv[1], "sm") == 0)
+    {
+        Server* s = new Server(port, IP_MYSELF);
+        s->connection();
+    }
 
-    // if(strcmp(argv[1], "ss") == 0){
-    //     Server* c = new Server(IP_SERVER, port, IP_MYSELF);
-    //     c->read_server();
-    // }
+    if(strcmp(argv[1], "ss") == 0){
+        Server* c = new Server(IP_SERVER, port, IP_MYSELF);
+        c->read_from_server();
+    }
 
-    // if(strcmp(argv[1], "c") == 0){
-    //     Client* c = new Client(IP_SERVER, port);
-    //     c->read_server();
-    // }
-    // else
-    //     cout<<"Please insert a value to execute server(s) or client(c) "<<endl;
+    if(strcmp(argv[1], "c") == 0){
+        Client* c = new Client(IP_SERVER, port);
+        c->read_server();
+    }
+    else
+        cout<<"Please insert a value to execute server(s) or client(c) "<<endl;
 
-    Connection test;
+    // Connection test;
     // bool var_rt;
     // var_rt = test.insert_node("GuyANA");
     // cout <<"ok? -> "<< var_rt<<endl;
     // test.insert_node("Peru");
     // bool a = test.insert_node("uruguay");
     // test.find_node_id("URUguay");
-    cout<<"RELATIONS: "<<endl;
+    /*cout<<"RELATIONS: "<<endl;
     vector<string> relations = test.find_relations("nerd");
     for(int i=0; i<relations.size(); i++)
-        cout<<relations[i]<<" ";
+        cout<<relations[i]<<" ";*/
         /*cout<<test.find_node_name(relations[i])<<" ";*/
     /*cout<<"relations[i].size(): "<<relations.size()<<endl;*/
 

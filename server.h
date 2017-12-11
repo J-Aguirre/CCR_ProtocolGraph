@@ -31,6 +31,7 @@ class Server {
         int port;
         char const* ip_address;
         char const* ip_myself;
+        int number_server;
         int message_server;
 
         char message[255];
@@ -48,16 +49,16 @@ class Server {
 
         Server();
         Server(char const*, int, char const*);
-        // port, header_size, packet_size,
-        Server(int);        
+        Server(int, char const*);
+
         void print_table_servers();
         void connection();
-        void read_server();
-        void new_client_connection(int);
+        void read_from_server();
+        void new_client_connection(int, int, const char*);
         int split(const string txt, vector<string> &strs, char ch);
         int print_vec_s(vector<string>);
         void send_data_to_server(int socket, string bigrama);
-        void load_data();
+        chars access_list(list<chars>, int);
 };
 
 Server::Server(){}
@@ -66,10 +67,7 @@ Server::Server(char const* ip, int port, char const* ip_myself)
 {
 
     this->protocol = new Protocol();
-    /*chars message = this->protocol->envelop("simple-message", "test text lalito");
-    cout<<"envelop message: "<<message<<endl;
-    chars unwrapped_messa = this->protocol->unwrap(message);
-    cout<<"unwrapped message: "<<unwrapped_messa<<endl;*/
+    this->db = new Connection();
 
     this->ip_myself = ip_myself;
     this->ip_address = ip;
@@ -112,12 +110,16 @@ Server::Server(char const* ip, int port, char const* ip_myself)
 }
 
 
-Server::Server(int port){
+Server::Server(int port, const char* ip_myself){
     this->protocol = new Protocol();
     this->db = new Connection();
 
     this->SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     this->port = port;
+
+    chars ip_myself_s(ip_myself);
+    pair<int, chars> element(SocketFD, ip_myself_s);
+    this->table_servers[0] = element;
 
     if(-1 == this->SocketFD)
     {
@@ -151,22 +153,56 @@ Server::Server(int port){
 
 void Server::print_table_servers(){
     map<int, pair<int, chars> >::iterator it;
-    printf("********SERVERS CONNECTED********* \n");
-    printf("----------------------------------\n");
-    printf("ID | Num ConnectID | Number name of server \n");
+    printf("\n**************SERVERS CONNECTED**************\n");
+    printf("---------------------------------------------\n");
+    printf("%5s | %13s | %15s \n", "ID", "Num ConnectID", "IP name of server");
+    printf("---------------------------------------------\n");
 
     for(it=this->table_servers.begin(); it!=this->table_servers.end(); it++) {
-        printf("%10d | %10d |%15s \n", it->first, it->second.first, it->second.second.c_str());
+        printf("%5d | %13d |%15s \n", it->first, it->second.first, it->second.second.c_str());
     }
+    printf("\n");
 }
 
 
-void Server::new_client_connection(int connect_id){
+chars Server::access_list(list<chars> test, int pos){
+    int var = 0;
+    chars word = "";
+
+    for (auto v : test){
+        if (var == pos){
+            word = v;
+        }
+        var++;
+    }
+
+    return word;
+}
+
+
+void Server::new_client_connection(int connect_id, int num_server, const char* action){
     for(;;)
     {
+        /*const char* bufferr = "Got it";*/
+        int stat;
+
+        do{
+            stat = write(connect_id, &num_server, sizeof(int));
+        }while(stat<0);
+        if (stat  < 0)
+            printf("Some problem writing NUMBER_SERVER in slave server\n");
+
+        do{
+            stat = write(connect_id, &action, sizeof(char) * 2);
+        }while(stat<0);
+        if (stat  < 0)
+            printf("Some problem writing ACTION in slave server\n");
+
+
     // do
     // {
         char* buffer;
+        cout<<"connect_id"<<connect_id<<endl;
         n = read(connect_id, buffer, DEFAUL_SIZE);
         if (n < 0) perror("ERROR reading from socket");
         
@@ -175,6 +211,7 @@ void Server::new_client_connection(int connect_id){
         list<chars> test = this->protocol->unwrap(mess_unwrap);
         cout<<"Message of client:"<<endl;
         this->protocol->print_list_str(test);
+
         int var = 0;
         chars word = "";
         chars word2 = "";
@@ -191,8 +228,12 @@ void Server::new_client_connection(int connect_id){
                 word2 = v;
             }
         }
-        //this->db->insert_node(word);
-        this->db->insert_relation(word, word2);
+
+
+        /*chars word = this->access_list(test, 2);*/
+        this->db->insert_node(word);
+        /*chars word2 = this->access_list(test, 3);*/
+        /*this->db->insert_relation(word, word2);*/
 
         chars messa = "";
         if(strlen(buffer) > 0){
@@ -226,7 +267,7 @@ void Server::connection(){
             close(this->SocketFD);
             exit(EXIT_FAILURE);
         }
-        printf("Client connected !!! \n");
+        printf("Server connected !!! \n");
 
         char buffer[256];
         bzero(buffer,256);
@@ -235,39 +276,55 @@ void Server::connection(){
 
         chars ip_server_connected(buffer);
         pair<int, chars> element(ConnectFD, ip_server_connected);
-        int size_table = this->table_servers.size();
-        this->table_servers[size_table + 1] = element;
+        int num_server = this->table_servers.size();
+        this->table_servers[num_server] = element;
         this->print_table_servers();
+        const char* action = "_n";
 
-
-        thread t(&Server::new_client_connection, this, ConnectFD);
+        thread t(&Server::new_client_connection, this, ConnectFD, num_server, action);
         t.detach();
 
-        /*char answer;
-        printf("Did you want load bigramas to servers? (Y/n): ");
-        scanf("%c" , &answer);
-        printf("answer: %c", answer);
-        if(answer == 'y' || answer == 'Y'){
-
-            this->load_data();
-        }
-        else{*/
-            printf("Waiting for another connection ... \n");
-        /*}*/
+        printf("Waiting for another connection ... \n");        
 
     }
 }
 
-void Server::read_server()
+void Server::analize_request_and_send(chars action, here comploete pachage){
+    if (action == "_n"){}
+}
+
+void Server::read_from_server()
 {
+    int stat;
+
     for(;;)
     {
         n = write(this->SocketFD, this->ip_myself, 15);
         if (n < 0) perror("ERROR writing to socket");
 
+        //(S) READING NUMBER SERVER FROM SERVER
+        int bufferr = 0;
+        do{
+            stat = read(this->SocketFD, &bufferr, 4);
+        }while(stat<0);
+
+        this->number_server = bufferr;
+        printf("NUMBER_SERVER MYSELF: %d\n", this->number_server);
+        //(E) READING NUMBER SERVER FROM SERVER
+
+
+        //(S) READING ALL MESSAGE REQUEST FROM SERVER
+        const char* buffer_c = "";
+        do{
+            stat = read(this->SocketFD, &buffer_c, 2);
+        }while(stat<0);
+
+        printf("ACTION MYSELF: %s\n", buffer_c);
+        //(E) READING ALL MESSAGE REQUEST FROM SERVER
+
         printf("Enter a message to server: ");
         scanf("%s" , this->message);
-        chars messa = this->protocol->wrap("_l", "",this->message, "");
+        chars messa = this->protocol->wrap("_n", "", this->message, "");
 
         n = write(this->SocketFD, messa.c_str(), messa.size());
         if (n < 0) perror("ERROR writing to socket");
@@ -299,49 +356,3 @@ int Server::print_vec_s(vector<string> vec){
         printf("%s - ", vec[i].c_str());
     printf("\n");
 }
-
-void Server::send_data_to_server(int socket, string bigrama){
-    printf("bigrama in send_data_to_server: %s\n", bigrama.c_str());
-    n = write(socket, bigrama.c_str(), 255);
-    if (n < 0) perror("ERROR writing to socket");
-}
-
-/*void Server::load_data(){
-    printf("load_data \n");
-    ifstream bigramas(this->path_bigramas);
-
-    string line;
-    if(bigramas.is_open())
-    {
-        int server_counter = 1;
-        string previous_first_word = "";
-        for(int i=0; i<10; i++)
-        {
-            getline(bigramas, line);
-            vector<string> line_vec;
-            this->split(line, line_vec, ' ');
-            this->print_vec_s(line_vec);
-            printf("something!!!\n");
-            printf("i: %d\n", i);
-            if(i != 0){
-                printf("previous_first_word: %s\n", previous_first_word.c_str());
-                printf("line_vec[0]: %s\n", line_vec[0].c_str());
-                if(previous_first_word != line_vec[0]){
-                    printf("Are differents!!!!!!\n");
-                    server_counter++;
-                }
-                else{
-                    printf("Are the SAME!!!!!!\n");
-                }
-            }
-
-            int socket_id = this->table_servers[server_counter];
-            printf("socket_id: %d\n", socket_id);
-            this->send_data_to_server(socket_id, line);
-            previous_first_word = line_vec[0];
-
-            // printf ("%s\n", line.c_str());
-        }
-        bigramas.close();
-    }
-}*/
