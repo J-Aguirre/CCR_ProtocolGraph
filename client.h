@@ -57,10 +57,6 @@ Client::Client(char const* ip, int port)
 {
 
     this->protocol = new Protocol();
-    /*chars message = this->protocol->envelop("simple-message", "test text lalito");
-    cout<<"envelop message: "<<message<<endl;
-    chars unwrapped_messa = this->protocol->unwrap(message);
-    cout<<"unwrapped message: "<<unwrapped_messa<<endl;*/
 
     this->ip_address = ip;
     this->port = port;
@@ -72,6 +68,7 @@ Client::Client(char const* ip, int port)
         perror("cannot create socket");
         exit(EXIT_FAILURE);
     }
+    printf("socket created");
 
     memset(&this->stSockAddr, 0, sizeof(struct sockaddr_in));
 
@@ -106,13 +103,6 @@ void Client::read_server()
 {
     for(;;)
     {
-        /*printf("message: %s\n", messa);
-        chars ALL_MSG_SIZE = this->protocol->all_message_size(messa);
-        printf("ALL_MSG_SIZE: %s\n", ALL_MSG_SIZE);
-
-        n = write(this->SocketFD, ALL_MSG_SIZE, chars_to_int(ALL_MSG_SIZE));
-        if (n < 0) perror("ERROR writing to socket");*/
-
         printf("Enter a message to server: ");
         scanf("%s" , this->message);
         chars messa = this->protocol->wrap("_n", "",this->message, "");

@@ -244,20 +244,40 @@ void Server::new_server_slave_connection(int connect_id, int num_server){
         printf("STATE_REQUEST: %d\n", this->STATE_REQUEST);
 
         if(this->STATE_REQUEST == true){
+            printf("Ready to sent request to SS\n");
             type_message = "request";
             do{
-                stat = write(connect_id, &type_message, sizeof(char));
+                stat = write(connect_id, &type_message, sizeof(char)*10);
             }while(stat<0);
             if(stat < 0)
                 printf("Someproblem writing a TYPE_MESSAGE in slave server\n");
 
+            chars message_buff = "";
+            printf("CREATE A NEW NODE: %s\n");
+            cin>>message_buff;
+            cout<<"Node to send: "<<message_buff<<endl;
+
+            chars wrap_mess = this->protocol->wrap("_n", "", message_buff, "");
+            const char* mess_buff = wrap_mess.c_str();
+            printf("mess_buff: %s\n", mess_buff);
+
+            int size_buff = wrap_mess.size();
+            printf("size_buff: %d\n", size_buff);
             do{
-                stat = write(connect_id, &this->REQUEST, sizeof(char));
+                stat = write(connect_id, (void*)&size_buff, sizeof(int));
             }while(stat<0);
-            if(stat  < 0)
-                printf("Some problem writing a REQUEST in slave server\n");
+            if (stat  < 0)
+                printf("Some problem writing SIZE of REQUEST in master server\n");
+
+            do{
+                cout<<"mess_buff bucle: "<< mess_buff<<endl;
+                stat = write(connect_id, &mess_buff, size_buff);
+            }while(stat < 0);
+            if (stat  < 0)
+                printf("Some problem writing request in master server\n");
         }
         else{
+        /*if(this->STATE_REQUEST == false){*/
             type_message = "num_server";
             printf("type_message: %s\n", type_message);
             do{
@@ -271,58 +291,10 @@ void Server::new_server_slave_connection(int connect_id, int num_server){
             }while(stat<0);
             if (stat  < 0)
                 printf("Some problem writing NUMBER_SERVER in slave server\n");
+            this->STATE_REQUEST = true;
+            continue;
         }
 
-
-    // do
-    // {
-        char* buffer;
-        cout<<"connect_id"<<connect_id<<endl;
-        n = read(connect_id, buffer, DEFAUL_SIZE);
-        if (n < 0) perror("ERROR reading from socket");
-        
-        chars mess_unwrap(buffer);
-        cout<<"mess_unwrap: "<<mess_unwrap<<endl;
-        list<chars> test = this->protocol->unwrap(mess_unwrap);
-        cout<<"Message of client:"<<endl;
-        this->protocol->print_list_str(test);
-
-        int var = 0;
-        chars word = "";
-        chars word2 = "";
-        for (auto v : test){
-            var++;
-            if (var == 2){
-                word = v;
-            }
-        }
-        var = 0;
-        for (auto v : test){
-            var++;
-            if (var == 3){
-                word2 = v;
-            }
-        }
-
-
-        /*chars word = this->access_list(test, 2);*/
-        this->db->insert_node(word);
-        /*chars word2 = this->access_list(test, 3);*/
-        /*this->db->insert_relation(word, word2);*/
-
-        chars messa = "";
-        if(strlen(buffer) > 0){
-            printf("Enter message to client: ");
-            scanf("%s" , this->message);
-            messa = this->protocol->wrap("_n", "", this->message, "");
-        }
-        else {
-            printf("Client desconnected !!! \n");
-            break;
-        }
-
-        n = write(connect_id, messa.c_str(), messa.size());
-        if (n < 0) perror("ERROR writing to socket");
     }
     // } while(buffer != "chao");
     shutdown(connect_id, SHUT_RDWR);
@@ -458,13 +430,12 @@ void Server::read_from_server_master()
 {
     int stat;
 
-    /*for(;;)
-    {*/
+    for(;;)
+    {
         do{
             n = write(this->SocketFD, this->ip_myself, 15);
         }while(n < 0);
         if(n < 0) perror("ERROR writing to socket");
-        printf("nsadsad: %d asdad\n", n);
 
         const char* type_message_buff = "";
         do{
@@ -473,15 +444,45 @@ void Server::read_from_server_master()
 
         printf("type_message_buff: %s\n", type_message_buff);
 
-        if (type_message_buff == "request"){
-            //(S) READING ALL MESSAGE REQUEST FROM SERVER
-            const char* buffer_c = "";
-            do{
-                stat = read(this->SocketFD, &buffer_c, 2);
-            }while(stat<0);
+        if (type_message_buff == "request"){    
 
-            printf("ACTION MYSELF: %s\n", buffer_c);
-            //(E) READING ALL MESSAGE REQUEST FROM SERVER
+            int size_buffer = 0;
+            printf("Waiting for request from SIZE REQUEST\n");
+            do{
+                stat = read(this->SocketFD, &size_buffer, sizeof(int));
+            }while(stat<0);
+            printf("size_buffer SS: %d\n", size_buffer);
+
+            const char* message_buffer = "";
+            printf("Waiting for request from SERVER MASTER\n");
+            do{
+                stat = read(this->SocketFD, &message_buffer, size_buffer);
+                printf("stat: %d\n", stat);
+            }while(stat<0);
+            cout<<"message_buffer: "<<message_buffer<<endl;
+
+            chars mess_unwrap(message_buffer);
+            cout<<"mess_unwrap: "<<mess_unwrap<<endl;
+            list<chars> test = this->protocol->unwrap(mess_unwrap);
+            cout<<"Message of client:"<<endl;
+            this->protocol->print_list_str(test);
+
+            int var = 0;
+            chars word = "";
+            chars word2 = "";
+            for (auto v : test){
+                var++;
+                if (var == 2){
+                    word = v;
+                }
+            }
+            var = 0;
+            for (auto v : test){
+                var++;
+                if (var == 3){
+                    word2 = v;
+                }
+            }
         }
         else{
 
@@ -494,13 +495,10 @@ void Server::read_from_server_master()
             this->number_server = bufferr;
             printf("NUMBER_SERVER MYSELF: %d\n", this->number_server);
             //(E) READING NUMBER SERVER FROM SERVER
+            continue;
         }
 
-        const char* message_buffer = "";
-        printf("Waiting for request from SERVER MASTER\n");
-        do{
-            stat = read(this->SocketFD, &message_buffer, 200);
-        }while(stat<0);
+        
 
         /*printf("Enter a message to server: ");
         scanf("%s" , this->message);
@@ -516,7 +514,7 @@ void Server::read_from_server_master()
         list<chars> test = this->protocol->unwrap(this->buffer);
         cout<<"Message of client:"<<endl;
         this->protocol->print_list_str(test);*/
-    /*}*/
+    }
 
     shutdown(this->SocketFD, SHUT_RDWR);
     close(this->SocketFD);
