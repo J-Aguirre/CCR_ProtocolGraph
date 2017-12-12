@@ -101,10 +101,15 @@ Client::Client(char const* ip, int port)
 
 void Client::read_server()
 {
+    int stat;
+    char ident[] = "1";
+    n = write(this->SocketFD, ident, 2);
     for(;;)
     {
         printf("Enter a message to server: ");
         scanf("%s" , this->message);
+
+
         chars messa = this->protocol->wrap("_n", "",this->message, "");
 
         n = write(this->SocketFD, messa.c_str(), messa.size());

@@ -15,7 +15,8 @@
 #include <string>
 #include <vector>
 #include <iterator>
-/*#include "protocol.h"*/
+
+//#include "protocol.h"
 
 using namespace std;
 
@@ -55,6 +56,7 @@ class Server {
         bool STATE_REQUEST; // if server is doing some request
         bool STATE_REQUEST_c; // if server is doing some request
         const char* REQUEST;
+
 
         Server();
         Server(char const*, int, char const*);
@@ -253,7 +255,7 @@ void Server::new_server_slave_connection(int connect_id, int num_server){
                 printf("Someproblem writing a TYPE_MESSAGE in slave server\n");
 
             chars message_buff = "";
-            printf("CREATE A NEW NODE: %s\n");
+            printf("CREATE A NEW NODE:\n");
             cin>>message_buff;
             cout<<"Node to send: "<<message_buff<<endl;
 
@@ -303,6 +305,10 @@ void Server::new_server_slave_connection(int connect_id, int num_server){
 
 void Server::connection(){
 
+    struct sockaddr_in client_addr;
+    socklen_t len;
+    char buffer[256];
+    char ident[2];
     for(;;){
 
         int ConnectFD = accept(this->SocketFD, NULL, NULL);
@@ -314,23 +320,48 @@ void Server::connection(){
             close(this->SocketFD);
             exit(EXIT_FAILURE);
         }
-        printf("Server connected !!! \n");
 
-        char buffer[256];
-        bzero(buffer,256);
-        n = read(ConnectFD, buffer, 16);
-        if (n < 0) perror("ERROR reading from socket");
+        else{
+            bzero(ident,2);
+            n = read(ConnectFD, ident, 2);
+            if (n < 0) perror("ERROR reading from socket");
+            if(ident[0]=='0'){
 
-        chars ip_server_connected(buffer);
-        pair<int, chars> element(ConnectFD, ip_server_connected);
-        int num_server = this->table_servers.size();
-        this->table_servers[num_server] = element;
-        this->print_table_servers();
-        const char* request = "_n100040030Perusynonyms:Ecuador,Chile,Uruguay"; // example of request _n
-        printf("this->STATE_REQUEST: %s\n", this->STATE_REQUEST);
-        thread t(&Server::new_server_slave_connection, this, ConnectFD, num_server);
-        t.detach();
+                printf("Server connected !!! \n");
+                
+                bzero(buffer,256);
+                n = read(ConnectFD, buffer, 16);
+                if (n < 0) perror("ERROR reading from socket");
 
+                chars ip_server_connected(buffer);
+                pair<int, chars> element(ConnectFD, ip_server_connected);
+                int num_server = this->table_servers.size();
+                this->table_servers[num_server] = element;
+                this->print_table_servers();
+                const char* request = "_n100040030Perusynonyms:Ecuador,Chile,Uruguay"; // example of request _n
+                printf("this->STATE_REQUEST: %d\n", this->STATE_REQUEST);
+
+                thread t(&Server::new_server_slave_connection, this, ConnectFD, num_server);
+                t.detach();
+            }
+            else if(ident[0]=='1'){ 
+                printf("Client connected !!! \n");
+                bzero(buffer,256);
+                n = read(ConnectFD, buffer, 256);
+                if (n < 0) perror("ERROR reading from socket");
+
+                chars ip_client_connected(buffer);
+                cout<<"ip_client_connected: "<<ip_client_connected<<endl;
+
+                list<chars> prtcl = this->protocol->unwrap(ip_client_connected);
+                list<chars>::iterator i;
+                for (i = prtcl.begin(); i != prtcl.end(); i++)
+                    cout<<*i<<endl;
+
+                //sacar protocolo
+
+            }
+        }
         printf("Waiting for another connection ... \n");
     }
 }
@@ -429,6 +460,8 @@ void Server::analize_request_and_send(chars request){
 void Server::read_from_server_master()
 {
     int stat;
+    char ident[] = "0";
+    n = write(this->SocketFD, ident, 2);
 
     for(;;)
     {
@@ -438,9 +471,9 @@ void Server::read_from_server_master()
         if(n < 0) perror("ERROR writing to socket");
 
         const char* type_message_buff = "";
-        do{
+        //do{
             stat = read(this->SocketFD, &type_message_buff, 10);
-        }while(stat<0);
+        //}while(stat<0);
 
         printf("type_message_buff: %s\n", type_message_buff);
 

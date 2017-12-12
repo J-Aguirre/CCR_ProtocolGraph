@@ -38,7 +38,7 @@ int main(int argc, char const *argv[])
     test.print_list_str(unwrap_mess);*/
 
     int port_servers = 1101;
-    int port_client = 1102;
+    int port_client = 1101;
     char const* IP_SERVER = "127.0.0.1";
     char const* IP_MYSELF = "127.0.0.1";
     chars path_wordnet = "../CCR.WN";
