@@ -15,11 +15,12 @@
 #include <string>
 #include <vector>
 #include <iterator>
+#include <unistd.h>
 /*#include "protocol.h"*/
 
 using namespace std;
 
-int DEFAUL_SIZE = 255;
+int DEFAULT_SIZE = 255;
 typedef string chars;
 
 class Server {
@@ -85,6 +86,7 @@ Server::Server(char const* ip, int port, char const* ip_myself)
     this->ip_myself = ip_myself;
     this->ip_address = ip;
     this->port = port;
+    this->STATE_REQUEST = false;
     this->SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     // error while we try create the token
@@ -252,11 +254,43 @@ void Server::new_server_slave_connection(int connect_id, int num_server){
             if(stat < 0)
                 printf("Someproblem writing a TYPE_MESSAGE in slave server\n");
 
-            chars message_buff = "";
-            printf("CREATE A NEW NODE(ex. peru ): %s\n");
-            cin>>message_buff;
 
-            chars wrap_mess = this->protocol->wrap("_n", "", message_buff, "");
+            int option;
+            chars wrap_mess = "";
+            cout<<"PRESS 1: if you want to create a new NODE"<<endl;
+            cout<<"PRESS 2: if you want to create a new NODE with attr"<<endl;
+            cout<<"PRESS 3: if you want to create a new RELATION"<<endl;
+            cout<<"PRESS 4: if you want to get deepness"<<endl;
+            cin >> option;
+
+            cout<<"INSERT REQUEST: "<<endl;
+            if(option == 1){
+                chars action, message_buff ;
+                cin >> action >> message_buff;
+                wrap_mess = this->protocol->wrap(action, ""
+                , message_buff, "");
+            }
+            if(option == 2){
+                chars action, message_buff, attr;
+                cin >> action >> message_buff >> attr;
+                wrap_mess = this->protocol->wrap(action, ""
+                , message_buff, attr);
+            }
+            if(option == 3){
+                chars action, message_buff;
+                cin >> action >> message_buff;
+                wrap_mess = this->protocol->wrap(action, ""
+                , message_buff, "");
+            }
+            if(option == 4){
+                chars action, message_buff, deepness;
+                cin >> action >> deepness >>message_buff;
+                wrap_mess = this->protocol->wrap(action, deepness
+                , message_buff, "");
+            }
+            /*printf("CREATE A NEW NODE(ex. peru ): %s\n");
+            cin>>message_buff;*/
+
             char const* mess_buff = wrap_mess.c_str();
             printf("mess_buff: %s\n", mess_buff);
 
@@ -325,7 +359,7 @@ void Server::connection(){
         this->table_servers[num_server] = element;
         this->print_table_servers();
         const char* request = "_n100040030Perusynonyms:Ecuador,Chile,Uruguay"; // example of request _n
-        printf("this->STATE_REQUEST: %s\n", this->STATE_REQUEST);
+        /*printf("this->STATE_REQUEST: %s\n", this->STATE_REQUEST);*/
         thread t(&Server::new_server_slave_connection, this, ConnectFD, num_server);
         t.detach();
 
@@ -339,7 +373,7 @@ void Server::new_client_connection(int connect_id){
     // do
     // {
         char* buffer;
-        n = read(connect_id, buffer, DEFAUL_SIZE);
+        n = read(connect_id, buffer, DEFAULT_SIZE);
         if (n < 0) perror("ERROR reading from socket");
         
         chars mess_unwrap(buffer);
@@ -440,7 +474,7 @@ void Server::read_from_server_master()
             stat = read(this->SocketFD, &type_message_buff, 10);
         }while(stat<0);
 
-        printf("type_message_buff: %s\n", type_message_buff);
+        printf("type_message_buff: %s\n", type_message_buff/**/);
 
         if (type_message_buff == "request"){    
 
@@ -465,21 +499,59 @@ void Server::read_from_server_master()
             this->protocol->print_list_str(test);
 
             int var = 0;
-            chars word = "";
+            chars word0 = "";
+            chars word1 = "";
             chars word2 = "";
+            chars word3 = "";
             for (auto v : test){
-                var++;
-                if (var == 2){
-                    word = v;
+                if (var == 0){
+                    word0 = v;
                 }
+                var++;
             }
             var = 0;
             for (auto v : test){
+                if (var == 1){
+                    word1 = v;
+                }
                 var++;
-                if (var == 3){
+            }
+            var = 0;
+            for (auto v : test){
+                if (var == 2){
                     word2 = v;
                 }
+                var++;
             }
+            var = 0;
+            for (auto v : test){
+                if (var == 3){
+                    word3 = v;
+                }
+                var++;
+            }
+            var = 0;
+
+            /*if(word0 == "_n"){
+                this->db->insert_node(word1);
+            }*/
+            if(word0 == "_n"){
+                thread ds(&Connection::insert_node, this->db, word1);
+                ds.detach();
+
+                this->db->insert_attribute(word1, splitt(word2, ':').front(), splitt(word2, ':').back());
+            }
+
+            if(word0 == "_l"){
+                thread ds(&Connection::insert_relation, this->db, word1, word2);
+                ds.detach();
+            }
+
+            if(word0 == "_q"){
+                thread ds(&Connection::find_relations, this->db, word2);
+                ds.detach();
+            }
+
         }
         else{
 
