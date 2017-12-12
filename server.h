@@ -355,22 +355,36 @@ void Server::connection(){
 
                 list<chars> prtcl = this->protocol->unwrap(ip_client_connected);
                 list<chars>::iterator i;
-                for (i = prtcl.begin(); i != prtcl.end(); i++)
-                    cout<<*i<<endl;
-
                 i = prtcl.begin();
                 
                 if(*i == "_n"){
                     i++;
                     chars word = *i;
                     db->insert_node(word);
+                    //thread t(db->insert_node,this,word);
+                    t.detach();
                     list<chars> attributes;
                     for(;i != prtcl.end(); i++){
                         attributes = splitt(*i,':');
                         cout<<attributes.front()<<":"<<attributes.back()<<endl;
-                        db->insert_attribute(word,attributes.front(),attributes.back());
+                        //db->insert_attribute(word,attributes.front(),attributes.back());
+                        //thread t2(db->insert_attribute,word,attributes.front(),attributes.back());
+                        //t2.detach();
                     }
                 }
+
+                // if(*i == "_q"){
+                //     i++;
+                //     chars word = *i;
+                //     // hash conexion esclavo
+                //     db->find_node(word);
+                //     list<chars> attributes;
+                //     for(;i != prtcl.end(); i++){
+                //         attributes = splitt(*i,':');
+                //         cout<<attributes.front()<<":"<<attributes.back()<<endl;
+                //         db->insert_attribute(word,attributes.front(),attributes.back());
+                //     }
+                // }
                     // case "_l":
                     //     i++;
                         
