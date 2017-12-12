@@ -264,7 +264,7 @@ void Server::new_client_connection(int connect_id, int num_server){
 
 
         /*chars word = this->access_list(test, 2);*/
-        this->db->insert_node(word);
+        //this->db->insert_node(word);
         /*chars word2 = this->access_list(test, 3);*/
         /*this->db->insert_relation(word, word2);*/
 
