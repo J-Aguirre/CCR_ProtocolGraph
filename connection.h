@@ -211,6 +211,31 @@ vector<string> Connection::find_relations(string attr){
 	return nodes_two;
 }
 
+
+/*vector<string> Connection::find_nodes(string attr){
+  vector< vector<string> > records;
+  string id = "";
+  attr = toLower(attr);
+
+  sql = "select id from nodes where name ='"+attr+"';";
+  rc = sqlite3_exec(db, sql.c_str(), callback_find, &records, &zErrMsg);
+
+  if( rc != SQLITE_OK ) {
+    fprintf(stderr, "SQL error: %s\n", zErrMsg);
+    sqlite3_free(zErrMsg);
+  } else {
+    fprintf(stdout, "Operation done successfully\n");
+  }
+
+  int i=0, j=0;
+  if(i<records.size() && j<records[i].size())
+    id = records[0][0];
+  cout<<"ID: "<<id<<endl;
+  return id;
+}*/
+
+
+
 void Connection::insert_attribute(string attr, string name_attribute, string value_attribute){
 	attr = toLower(attr);
   string id_node = find_node_id(attr);

@@ -367,24 +367,29 @@ void Server::connection(){
                     for(;i != prtcl.end(); i++){
                         attributes = splitt(*i,':');
                         cout<<attributes.front()<<":"<<attributes.back()<<endl;
-                        //db->insert_attribute(word,attributes.front(),attributes.back());
+                        db->insert_attribute(word,attributes.front(),attributes.back());
                         //thread t2(db->insert_attribute,word,attributes.front(),attributes.back());
                         //t2.detach();
                     }
                 }
 
-                // if(*i == "_q"){
-                //     i++;
-                //     chars word = *i;
-                //     // hash conexion esclavo
-                //     db->find_node(word);
-                //     list<chars> attributes;
-                //     for(;i != prtcl.end(); i++){
-                //         attributes = splitt(*i,':');
-                //         cout<<attributes.front()<<":"<<attributes.back()<<endl;
-                //         db->insert_attribute(word,attributes.front(),attributes.back());
-                //     }
-                // }
+                /*if(*i == "_q"){
+                    i++;
+                    chars word = *i;
+                    // hash conexion esclavo
+                    //list<chars>::iterator it;
+                    string idn = db->find_node_id(word);*/
+                    
+
+
+                    /*list<chars> attributes;
+                    for(;i != prtcl.end(); i++){
+                        attributes = splitt(*i,':');
+                        cout<<attributes.front()<<":"<<attributes.back()<<endl;
+                        db->insert_attribute(word,attributes.front(),attributes.back());
+                    }*/
+
+                }
                     // case "_l":
                     //     i++;
                         
