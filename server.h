@@ -17,6 +17,7 @@
 #include <iterator>
 /*#include "protocol.h"*/
 
+
 using namespace std;
 
 int DEFAUL_SIZE = 255;
@@ -62,11 +63,12 @@ class Server {
         void send_data_to_server(int socket, string bigrama);
         chars access_list(list<chars>, int);
         void analize_request_and_send(chars);
+
 };
 
 Server::Server(){}
 
-Server::Server(char const* ip, int port, char const* ip_myself)
+Server::Server(char const* ip, int port, char const* ip_myself) //esclavo
 {
 
     this->protocol = new Protocol();
@@ -114,6 +116,7 @@ Server::Server(char const* ip, int port, char const* ip_myself)
 
 
 Server::Server(int port, const char* ip_myself){
+
     this->protocol = new Protocol();
     this->db = new Connection();
     this->STATE_REQUEST = false;
@@ -188,6 +191,7 @@ chars Server::access_list(list<chars> test, int pos){
 void Server::new_client_connection(int connect_id, int num_server){
     printf("num_server: %d\n", num_server);
 
+    char buffer[DEFAUL_SIZE];
     for(;;)
     {
         int stat;
@@ -227,13 +231,16 @@ void Server::new_client_connection(int connect_id, int num_server){
 
     // do
     // {
-        char* buffer;
+        bzero(buffer,DEFAUL_SIZE);
+        //char* buffer;
         cout<<"connect_id"<<connect_id<<endl;
+
         n = read(connect_id, buffer, DEFAUL_SIZE);
         if (n < 0) perror("ERROR reading from socket");
-        
-        chars mess_unwrap(buffer);
+        cout<<"buffer: "<<buffer<<endl;
+        chars mess_unwrap = buffer;
         cout<<"mess_unwrap: "<<mess_unwrap<<endl;
+        cout<<"recibio"<<endl;
         list<chars> test = this->protocol->unwrap(mess_unwrap);
         cout<<"Message of client:"<<endl;
         this->protocol->print_list_str(test);
@@ -282,33 +289,50 @@ void Server::new_client_connection(int connect_id, int num_server){
 
 void Server::connection(){
 
+    struct sockaddr_in client_addr;
+    socklen_t len;
+    char buffer[256];
+    cout<<"this->SocketFD: "<<this->SocketFD<<endl;
     for(;;){
 
-        int ConnectFD = accept(this->SocketFD, NULL, NULL);
-        cout<<"this->SocketFD: "<<this->SocketFD<<endl;
-
+        len = sizeof(client_addr);
+        int ConnectFD = accept(this->SocketFD, (struct sockaddr *)&client_addr, &len);
+        //int ConnectFD = accept(this->SocketFD, NULL, NULL);
+        
+        
+        int num_server;
         if(0 > ConnectFD)
         {
             perror("error accept failed");
             close(this->SocketFD);
             exit(EXIT_FAILURE);
         }
-        printf("Server connected !!! \n");
+        else
+        {
+            printf("Server connected !!! \n");
 
-        char buffer[256];
-        bzero(buffer,256);
-        n = read(ConnectFD, buffer, 16);
-        if (n < 0) perror("ERROR reading from socket");
+            char buffr[2];
+            bzero(buffr,2);
+            n = read(ConnectFD, buffr, 2);
+            cout<<buffr<<endl;
+            if(buffr[0]=='0')
+            {
+                char buffer[256];
+                bzero(buffer,256);
+                n = read(ConnectFD, buffer, 16);
+                if (n < 0) perror("ERROR reading from socket");
 
-        chars ip_server_connected(buffer);
-        pair<int, chars> element(ConnectFD, ip_server_connected);
-        int num_server = this->table_servers.size();
-        this->table_servers[num_server] = element;
-        this->print_table_servers();
-        const char* request = "_n100040030Perusynonyms:Ecuador,Chile,Uruguay"; // example of request _n
-        printf("this->STATE_REQUEST: %s\n", this->STATE_REQUEST);
-        thread t(&Server::new_client_connection, this, ConnectFD, num_server);
-        t.detach();
+                chars ip_server_connected(buffer);
+                pair<int, chars> element(ConnectFD, ip_server_connected);
+                num_server = this->table_servers.size();
+                this->table_servers[num_server] = element;
+                this->print_table_servers();
+                const char* request = "_n100040030Perusynonyms:Ecuador,Chile,Uruguay"; // example of request _n
+                printf("this->STATE_REQUEST: %d\n", this->STATE_REQUEST);
+            }
+        }
+        thread(&Server::new_client_connection, this, ConnectFD, num_server).detach();
+
 
         printf("Waiting for another connection ... \n");        
 
@@ -325,7 +349,8 @@ void Server::analize_request_and_send(chars request){
 void Server::read_from_server_master()
 {
     int stat;
-
+    char msg[] = "0";
+    n = write(this->SocketFD, msg, 2);
     /*for(;;)
     {*/
         do{
@@ -352,6 +377,7 @@ void Server::read_from_server_master()
             //(E) READING ALL MESSAGE REQUEST FROM SERVER
         }
         else{
+
 
             //(S) READING NUMBER SERVER FROM SERVER
             int bufferr = 0;
@@ -404,3 +430,4 @@ int Server::print_vec_s(vector<string> vec){
         printf("%s - ", vec[i].c_str());
     printf("\n");
 }
+

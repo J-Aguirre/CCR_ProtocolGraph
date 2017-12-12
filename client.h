@@ -104,6 +104,8 @@ Client::Client(char const* ip, int port)
 
 void Client::read_server()
 {
+    char msg[] = "1";
+    n = write(this->SocketFD, msg, 2);
     for(;;)
     {
         /*printf("message: %s\n", messa);
@@ -116,12 +118,13 @@ void Client::read_server()
         printf("Enter a message to server: ");
         scanf("%s" , this->message);
         chars messa = this->protocol->wrap("_n", "",this->message, "");
+        cout<<"messa: "<<messa<<endl;
 
-        n = write(this->SocketFD, messa.c_str(), messa.size());
+        n = write(this->SocketFD, messa.c_str(), messa.length());
         if (n < 0) perror("ERROR writing to socket");
-        
-        bzero(this->buffer, 255);
-        this->message_server = read(this->SocketFD, this->buffer, 255);
+        cout<<"cstr: "<<messa.c_str()<<endl;
+        bzero(this->buffer, messa.length());
+        this->message_server = read(this->SocketFD, this->buffer, messa.length());
         if (this->message_server < 0) perror("ERROR reading from socket");
 
         list<chars> test = this->protocol->unwrap(this->buffer);

@@ -40,6 +40,7 @@ int main(int argc, char const *argv[])
     int port = 1100;
     char const* IP_SERVER = "127.0.0.1";
     char const* IP_MYSELF = "127.0.0.1";
+
     chars path_wordnet = "../CCR.WN";
 
     if(strcmp(argv[1], "sm") == 0)
