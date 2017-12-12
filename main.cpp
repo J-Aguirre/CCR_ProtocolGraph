@@ -35,8 +35,8 @@ int main(int argc, char const *argv[])
     test.print_list_str(unwrap_mess);*/
 
     int port = 1100;
-    char const* IP_SERVER = "127.0.0.1";
-    char const* IP_MYSELF = "127.0.0.1";
+    char const* IP_SERVER = "192.168.9.106";
+    char const* IP_MYSELF = "192.168.9.106";
     chars path_bigramas = "../en.wiki.big";
     chars path_wordnet = "../CCR.WN";
 

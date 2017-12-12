@@ -176,36 +176,67 @@ void Server::new_client_connection(int connect_id){
         cout<<"Message of client:"<<endl;
         this->protocol->print_list_str(test);
         int var = 0;
-        chars word = "";
+        chars word0 = "";
+        chars word1 = "";
         chars word2 = "";
+        chars word3 = "";
+        chars word4 = "";
+
         for (auto v : test){
-            var++;
-            if (var == 2){
-                word = v;
+            if (var == 0){
+                word0 = v;
             }
+            var++;
         }
         var = 0;
         for (auto v : test){
+            if (var == 1){
+                word1 = v;
+            }
             var++;
-            if (var == 3){
+        }
+        var = 0;
+        for (auto v : test){
+            if (var == 2){
                 word2 = v;
             }
+            var++;
         }
-        //this->db->insert_node(word);
-        this->db->insert_relation(word, word2);
+        var = 0;
+        for (auto v : test){
+            if (var == 3){
+                word3 = v;
+            }
+            var++;
+        }
+        var = 0;
+        for (auto v : test){
+            if (var == 4){
+                word4 = v;
+            }
+            var++;
+        }
+        cout<<"word0: "<<word0<<endl;
+        cout<<"word1: "<<word1<<endl;
+        if(word0 == "_n")
+            this->db->insert_node(word1);
+        if(word0 == "_ĺ")
+            this->db->insert_relation(word1, word2);
+        /*if(word0 == '_q')
+            this->db->*/
 
-        chars messa = "";
+        /*chars messa = "";
         if(strlen(buffer) > 0){
             printf("Enter message to client: ");
             scanf("%s" , this->message);
-            messa = this->protocol->wrap("_n", "", this->message, "");
+            messa = this->protocol->wrap("_l", "", this->message, "");
         }
         else {
             printf("Client desconnected !!! \n");
             break;
         }
 
-        n = write(connect_id, messa.c_str(), messa.size());
+        n = write(connect_id, messa.c_str(), messa.size());*/
         if (n < 0) perror("ERROR writing to socket");
     }
     // } while(buffer != "chao");
@@ -265,9 +296,33 @@ void Server::read_server()
         n = write(this->SocketFD, this->ip_myself, 15);
         if (n < 0) perror("ERROR writing to socket");
 
+        int option = 0;
+        chars action = "";
+        chars deepness = "";
+        chars attributes = "";
+        cout<<"PUT 1: if you want to insert a node: "<<endl;
+        cout<<"PUT 2: if you want to insert a relation: "<<endl;
+        cout<<"PUT 3: if you want to insert a query deepness: "<<endl;
+        cout<<"PUT 4: if you want to insert a sentence deepness: "<<endl;
+        cin>>option;
+        if(option == 1){
+            action = "_n";
+        }
+        if(option == 2){
+            action = "_l";
+        }
+        if(option == 3){
+            action = "_q";
+            deepness = "2";
+        }
+        if(option == 4){
+            action = "_p";
+            deepness = "2";
+        }
         printf("Enter a message to server: ");
         scanf("%s" , this->message);
-        chars messa = this->protocol->wrap("_l", "",this->message, "");
+
+        chars messa = this->protocol->wrap(action, deepness, this->message, attributes);
 
         n = write(this->SocketFD, messa.c_str(), messa.size());
         if (n < 0) perror("ERROR writing to socket");
