@@ -253,12 +253,11 @@ void Server::new_server_slave_connection(int connect_id, int num_server){
                 printf("Someproblem writing a TYPE_MESSAGE in slave server\n");
 
             chars message_buff = "";
-            printf("CREATE A NEW NODE: %s\n");
+            printf("CREATE A NEW NODE(ex. peru ): %s\n");
             cin>>message_buff;
-            cout<<"Node to send: "<<message_buff<<endl;
 
             chars wrap_mess = this->protocol->wrap("_n", "", message_buff, "");
-            const char* mess_buff = wrap_mess.c_str();
+            char const* mess_buff = wrap_mess.c_str();
             printf("mess_buff: %s\n", mess_buff);
 
             int size_buff = wrap_mess.size();
@@ -271,13 +270,12 @@ void Server::new_server_slave_connection(int connect_id, int num_server){
 
             do{
                 cout<<"mess_buff bucle: "<< mess_buff<<endl;
-                stat = write(connect_id, &mess_buff, size_buff);
+                stat = write(connect_id, mess_buff, size_buff);
             }while(stat < 0);
             if (stat  < 0)
                 printf("Some problem writing request in master server\n");
         }
         else{
-        /*if(this->STATE_REQUEST == false){*/
             type_message = "num_server";
             printf("type_message: %s\n", type_message);
             do{
@@ -453,13 +451,12 @@ void Server::read_from_server_master()
             }while(stat<0);
             printf("size_buffer SS: %d\n", size_buffer);
 
-            const char* message_buffer = "";
+            char message_buffer[DEFAULT_SIZE];
             printf("Waiting for request from SERVER MASTER\n");
             do{
                 stat = read(this->SocketFD, &message_buffer, size_buffer);
                 printf("stat: %d\n", stat);
             }while(stat<0);
-            cout<<"message_buffer: "<<message_buffer<<endl;
 
             chars mess_unwrap(message_buffer);
             cout<<"mess_unwrap: "<<mess_unwrap<<endl;
