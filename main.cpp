@@ -37,6 +37,9 @@ int main(int argc, char const *argv[])
     cout<<endl<<"PARAMETERS TO SERVER"<<endl<<endl;
     test.print_list_str(unwrap_mess);*/
 
+    Connection test;
+    string message = "";
+
     int port_servers = 1101;
     int port_client = 1101;
     char const* IP_SERVER = "127.0.0.1";

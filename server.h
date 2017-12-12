@@ -358,6 +358,67 @@ void Server::connection(){
                 for (i = prtcl.begin(); i != prtcl.end(); i++)
                     cout<<*i<<endl;
 
+                i = prtcl.begin();
+                
+                if(*i == "_n"){
+                    i++;
+                    chars word = *i;
+                    db->insert_node(word);
+                    list<chars> attributes;
+                    for(;i != prtcl.end(); i++){
+                        attributes = splitt(*i,':');
+                        cout<<attributes.front()<<":"<<attributes.back()<<endl;
+                        db->insert_attribute(word,attributes.front(),attributes.back());
+                    }
+                }
+                    // case "_l":
+                    //     i++;
+                        
+                    //     /*map<int, pair<int, chars> >::iterator it;
+                    //     printf("\n**************SERVERS CONNECTED**************\n");
+                    //     printf("---------------------------------------------\n");
+                    //     printf("%5s | %13s | %15s \n", "ID", "Num ConnectID", "IP name of server");
+                    //     printf("---------------------------------------------\n");
+
+                    //     for(it=this->table_servers.begin(); it!=this->table_servers.end(); it++) {
+                    //         printf("%5d | %13d |%15s \n", it->first, it->second.first, it->second.second.c_str());
+                    //     }
+                    //     printf("\n");*/
+
+                    //     map<int, pair<int, chars> >::iterator it = this->table_servers.begin();
+                    //     char buff[256];
+                    //     do
+                    //     {
+
+                    //     }while(1)
+
+                    //     //db->insert_relation(*i,*i);
+                    //     break;
+
+                    // case "_q":
+                    //     i++;
+                    //     db->find_node_id(*i);
+                    //     break;
+
+                    // case "_p":
+                    //     i++;
+                    //     //db->find_node_id(*i);
+                    //     break;
+
+                    // case "_c":
+                    //     i++;
+                    //     //db->find_node_id(*i);
+                    //     break;
+
+                    // case "_s":
+                    //     i++;
+                    //     //db->find_node_id(*i);
+                    //     break;
+
+                    // default:
+                    //     cout<<"ERROR"<<endl;
+                    //     break;
+
                 //sacar protocolo
 
             }

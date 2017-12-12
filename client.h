@@ -107,10 +107,16 @@ void Client::read_server()
     for(;;)
     {
         printf("Enter a message to server: ");
+        //scanf("%s" , this->message);
+
+        string type, attr;
+        /*scanf("%s" , type);
         scanf("%s" , this->message);
+        scanf("%s" , attr);*/
+        cin >> type >> this->message >> attr;
 
-
-        chars messa = this->protocol->wrap("_n", "",this->message, "");
+        chars messa = this->protocol->wrap(type.c_str(), "",this->message, attr.c_str());
+        //chars messa = this->protocol->wrap("_n", "","mensjae", "sinonym:mensaje2");
 
         n = write(this->SocketFD, messa.c_str(), messa.size());
         if (n < 0) perror("ERROR writing to socket");

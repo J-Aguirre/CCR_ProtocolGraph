@@ -56,7 +56,7 @@ class Connection{
 
 Connection::Connection(){
      /* Open database */
-     rc = sqlite3_open("/home/lalo/college/networking/FinalProtocolGraph/protocol_db.db", &db);
+     rc = sqlite3_open("/home/elard/CCR_ProtocolGraph/protocol_db.db", &db);
      if(rc) {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
      } else {
